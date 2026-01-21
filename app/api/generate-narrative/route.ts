@@ -94,9 +94,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ narrative })
   } catch (error) {
-    console.error('Error generating narrative:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorDetails = error instanceof Error ? error.stack : String(error)
+    console.error('Error generating narrative:', errorMessage, errorDetails)
     return NextResponse.json(
-      { error: 'Failed to generate narrative' },
+      { error: 'Failed to generate narrative', details: errorMessage },
       { status: 500 }
     )
   }
