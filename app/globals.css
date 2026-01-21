@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Medical Primary Colors */
+  --medical-primary: 51 102 204;
+  --medical-secondary: 0 153 184;
+
+  /* Category Colors */
+  --color-pass: 51 179 77;
+  --color-honors: 153 102 230;
+  --color-fail: 230 51 51;
+
+  /* Status Colors */
+  --color-success: 51 179 77;
+  --color-warning: 255 153 0;
+  --color-critical: 230 51 51;
+
+  /* Light theme */
+  --background: 250 250 252;
+  --foreground: 28 28 30;
+  --card-background: 255 255 255;
+  --card-border: 229 229 234;
+  --sidebar-background: 242 242 247;
+  --sidebar-border: 229 229 234;
+  --input-background: 255 255 255;
+  --input-border: 209 209 214;
+  --muted: 142 142 147;
+  --muted-foreground: 99 99 102;
+}
+
+.dark {
+  --background: 28 28 30;
+  --foreground: 255 255 255;
+  --card-background: 44 44 46;
+  --card-border: 58 58 60;
+  --sidebar-background: 36 36 38;
+  --sidebar-border: 58 58 60;
+  --input-background: 44 44 46;
+  --input-border: 72 72 74;
+  --muted: 142 142 147;
+  --muted-foreground: 174 174 178;
+}
+
+body {
+  background-color: rgb(var(--background));
+  color: rgb(var(--foreground));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--sidebar-background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--muted-foreground));
+}
+
+/* Utility classes */
+.card {
+  background-color: rgb(var(--card-background));
+  border: 1px solid rgb(var(--card-border));
+  border-radius: 12px;
+}
+
+.sidebar-bg {
+  background-color: rgb(var(--sidebar-background));
+}
+
+.input-bg {
+  background-color: rgb(var(--input-background));
+  border: 1px solid rgb(var(--input-border));
+}
+
+/* Category pills */
+.pill-pass {
+  background-color: rgb(var(--color-pass) / 0.15);
+  color: rgb(var(--color-pass));
+  border: 1px solid rgb(var(--color-pass) / 0.3);
+}
+
+.pill-honors {
+  background-color: rgb(var(--color-honors) / 0.15);
+  color: rgb(var(--color-honors));
+  border: 1px solid rgb(var(--color-honors) / 0.3);
+}
+
+.pill-fail {
+  background-color: rgb(var(--color-fail) / 0.15);
+  color: rgb(var(--color-fail));
+  border: 1px solid rgb(var(--color-fail) / 0.3);
+}
+
+/* Selection states */
+.item-selected {
+  background-color: rgb(var(--medical-primary) / 0.1);
+  border-color: rgb(var(--medical-primary) / 0.4);
+}
+
+.item-unselected {
+  background-color: rgb(var(--card-background));
+  border-color: rgb(var(--card-border));
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Loading spinner */
+.spinner {
+  border: 2px solid rgb(var(--card-border));
+  border-top: 2px solid rgb(var(--medical-primary));
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

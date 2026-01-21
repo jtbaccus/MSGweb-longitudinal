@@ -1,0 +1,60 @@
+export type PerformanceLevel = 'fail' | 'pass' | 'honors'
+
+export interface EvaluationItem {
+  id: string
+  name: string
+  description: string
+  category: PerformanceLevel
+  section: string
+  isSelected: boolean
+}
+
+export interface PersonalAttribute {
+  id: string
+  name: string
+  isSelected: boolean
+}
+
+export interface ClerkshipTemplate {
+  id: string
+  name: string
+  description: string
+  icon: string
+  items: Omit<EvaluationItem, 'isSelected'>[]
+}
+
+export interface ComprehensiveReportData {
+  studentName: string
+  evaluatorName: string
+  evaluationDate: string
+  clerkshipName: string
+  performanceLevel: PerformanceLevel
+  strengths: EvaluationItem[]
+  areasForImprovement: EvaluationItem[]
+  attributes: PersonalAttribute[]
+  narrativeText: string
+  generatedNarrative: string
+  includeStrengths: boolean
+  includeAreasForImprovement: boolean
+  includeAttributes: boolean
+  includeNarrative: boolean
+  includeGeneratedNarrative: boolean
+}
+
+export type NavigationTab =
+  | 'templates'
+  | 'evaluation'
+  | 'attributes'
+  | 'narrative'
+  | 'summary'
+  | 'generate'
+  | 'export'
+  | 'settings'
+
+export interface NavigationItem {
+  id: NavigationTab
+  label: string
+  icon: string
+}
+
+export type ThemeMode = 'light' | 'dark' | 'system'
