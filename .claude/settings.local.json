@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(git init:*)",
-      "Bash(git add:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial commit: Medical Student Grader web app\n\nNext.js 14 application for generating narrative evaluations for medical\nstudents completing clinical clerkship rotations. Uses GPT-5.2 to generate\nprofessional strengths-only narratives based on selected criteria.\n\nFeatures:\n- Clerkship-specific evaluation templates \\(Surgery, Internal Medicine, etc.\\)\n- Fail/Pass/Honors criteria selection\n- Personal attributes tagging\n- AI-powered narrative generation with natural language output\n- Copy-to-clipboard for MedHub submission\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
-    ]
-  }
-}
