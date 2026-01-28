@@ -111,7 +111,7 @@ export const defaultTemplates: ClerkshipTemplate[] = [
     id: 'neurology',
     name: 'Neurology',
     description: 'Comprehensive evaluation for Neurology clerkship rotations',
-    icon: 'Activity',
+    icon: 'Brain',
     items: [
       // FAIL: Professionalism
       { id: 'neuro-f-prof-1', name: 'Does not complete assignments in a timely manner', description: 'Does not complete assignments in a timely manner', category: 'fail', section: 'Professionalism' },
@@ -241,7 +241,7 @@ export const defaultTemplates: ClerkshipTemplate[] = [
     id: 'psychiatry',
     name: 'Psychiatry',
     description: 'Evaluation criteria for Psychiatry clerkship rotations',
-    icon: 'Brain',
+    icon: 'Psi',
     items: [
       // Placeholder items matching Swift app
       { id: 'psych-f-1', name: 'Placeholder Text', description: 'Placeholder Text', category: 'fail', section: 'Placeholder 1' },
@@ -253,7 +253,7 @@ export const defaultTemplates: ClerkshipTemplate[] = [
     id: 'ob-gyn',
     name: 'OB/GYN',
     description: 'Evaluation criteria for Obstetrics and Gynecology clerkship rotations',
-    icon: 'Heart',
+    icon: 'Maternity',
     items: [
       // Placeholder items matching Swift app
       { id: 'obgyn-f-1', name: 'Placeholder Text', description: 'Placeholder Text', category: 'fail', section: 'Placeholder 1' },

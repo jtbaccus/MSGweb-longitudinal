@@ -3,7 +3,6 @@
 import { clsx } from 'clsx'
 import {
   Stethoscope,
-  Activity,
   Scissors,
   Baby,
   Brain,
@@ -12,12 +11,13 @@ import {
   Siren,
   FileText,
 } from 'lucide-react'
+import { PsiIcon } from '@/components/icons/PsiIcon'
+import { MaternityIcon } from '@/components/icons/MaternityIcon'
 import { ClerkshipTemplate } from '@/lib/types'
 import { Card } from '@/components/ui/Card'
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Stethoscope,
-  Activity,
   Scissors,
   Baby,
   Brain,
@@ -25,6 +25,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Users,
   Siren,
   FileText,
+  Psi: PsiIcon,
+  Maternity: MaternityIcon,
 }
 
 interface TemplateCardProps {
