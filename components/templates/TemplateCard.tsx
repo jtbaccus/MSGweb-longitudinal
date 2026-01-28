@@ -3,6 +3,7 @@
 import { clsx } from 'clsx'
 import {
   Stethoscope,
+  Activity,
   Scissors,
   Baby,
   Brain,
@@ -16,6 +17,7 @@ import { Card } from '@/components/ui/Card'
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Stethoscope,
+  Activity,
   Scissors,
   Baby,
   Brain,
