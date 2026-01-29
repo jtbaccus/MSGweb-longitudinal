@@ -80,17 +80,19 @@ export async function POST(request: NextRequest) {
       narrativeContext,
     })
 
-    const completion = await openai.chat.completions.create({
+    const response = await openai.responses.create({
       model: 'gpt-5.2',
-      messages: [
+      reasoning: { effort: "none" },
+      text: { verbosity: "medium" },
+      input: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
       temperature: 0.7,
-      max_completion_tokens: 1000,
+      max_output_tokens: 1000,
     })
 
-    const narrative = completion.choices[0]?.message?.content || ''
+    const narrative = response.output_text || ''
 
     return NextResponse.json({ narrative })
   } catch (error) {
