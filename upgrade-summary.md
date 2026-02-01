@@ -130,16 +130,6 @@ The following were tested and confirmed working:
 - Evaluation workflow (item selection, performance levels)
 - Theme switching (dark/light mode)
 - PDF export (comprehensive and student summary)
-- Narrative generation (requires API key)
+- Narrative generation
 
----
 
-## Questions?
-
-If you encounter any issues after pulling these changes:
-
-1. Delete `node_modules` and `package-lock.json`
-2. Run `npm install`
-3. Clear your browser cache / hard refresh
-
-For persistent issues, open an issue on the repository.
