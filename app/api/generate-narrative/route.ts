@@ -81,14 +81,14 @@ export async function POST(request: NextRequest) {
     })
 
     const stream = await openai.responses.create({
-      model: 'gpt-5.2',
-      reasoning: { effort: "none" },
+      model: 'gpt-5-mini',
+      reasoning: { effort: "minimal" },
       text: { verbosity: "medium" },
       input: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
-      temperature: 0.7,
+      // temperature: 0.7, // Unsupported by gpt-5-mini
       max_output_tokens: 1000,
       stream: true,
     })
