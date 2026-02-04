@@ -66,16 +66,50 @@ export function AIGenerationView() {
       }
 
       const decoder = new TextDecoder()
-      let narrative = ''
+      let fullText = ''
+      let isStreamComplete = false
+      let streamError: Error | null = null
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = decoder.decode(value, { stream: true })
-        narrative += chunk
-        setGeneratedNarrative(narrative)
+      // Start fetching in background
+      const fetchStream = async () => {
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            fullText += decoder.decode(value, { stream: true })
+          }
+        } catch (err) {
+          streamError = err instanceof Error ? err : new Error('Stream error')
+        } finally {
+          isStreamComplete = true
+        }
       }
+
+      const fetchPromise = fetchStream()
+
+      let displayedText = ''
+
+      // Smooth display loop
+      while (!isStreamComplete || displayedText.length < fullText.length) {
+        if (streamError) throw streamError
+
+        if (displayedText.length < fullText.length) {
+          const queueSize = fullText.length - displayedText.length
+          let charCount = 1
+
+          // Adaptive speed based on queue size
+          if (queueSize > 50) charCount = 5
+          else if (queueSize > 20) charCount = 2
+
+          const chunk = fullText.slice(displayedText.length, displayedText.length + charCount)
+          displayedText += chunk
+          setGeneratedNarrative(displayedText)
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 16))
+      }
+
+      await fetchPromise
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
