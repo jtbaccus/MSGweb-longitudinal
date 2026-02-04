@@ -40,6 +40,8 @@ export function AIGenerationView() {
   const handleGenerate = async () => {
     setIsGenerating(true)
     setGenerationError(null)
+    setGeneratedNarrative('')
+    setEditedGeneratedNarrative('')
 
     try {
       const response = await fetch('/api/generate-narrative', {
@@ -58,8 +60,22 @@ export function AIGenerationView() {
         throw new Error('Failed to generate narrative')
       }
 
-      const data = await response.json()
-      setGeneratedNarrative(data.narrative)
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('Response body is null')
+      }
+
+      const decoder = new TextDecoder()
+      let narrative = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        narrative += chunk
+        setGeneratedNarrative(narrative)
+      }
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
@@ -166,7 +182,7 @@ export function AIGenerationView() {
       )}
 
       {/* Generated Output */}
-      {editedGeneratedNarrative && (
+      {(editedGeneratedNarrative || isGenerating) && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -175,11 +191,11 @@ export function AIGenerationView() {
                 Generated Narrative
               </CardTitle>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleReset}>
+                <Button variant="outline" size="sm" onClick={handleReset} disabled={isGenerating}>
                   <RotateCcw className="w-4 h-4 mr-1" />
                   Reset
                 </Button>
-                <Button variant="primary" size="sm" onClick={handleCopy}>
+                <Button variant="primary" size="sm" onClick={handleCopy} disabled={isGenerating}>
                   {copied ? (
                     <>
                       <CheckCircle className="w-4 h-4 mr-1" />
@@ -202,6 +218,7 @@ export function AIGenerationView() {
               rows={12}
               showCharCount
               className="min-h-[250px]"
+              disabled={isGenerating}
             />
             <p className="text-xs text-[rgb(var(--muted-foreground))] mt-2">
               You can edit the generated narrative above before copying.

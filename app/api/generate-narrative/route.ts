@@ -80,21 +80,44 @@ export async function POST(request: NextRequest) {
       narrativeContext,
     })
 
-    const response = await openai.responses.create({
-      model: 'gpt-5.2',
-      reasoning: { effort: "none" },
+    const stream = await openai.responses.create({
+      model: 'gpt-5-mini',
+      reasoning: { effort: "minimal" },
       text: { verbosity: "medium" },
       input: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
-      temperature: 0.7,
+      // temperature: 0.7, // Unsupported by gpt-5-mini
       max_output_tokens: 1000,
+      stream: true,
     })
 
-    const narrative = response.output_text || ''
+    const encoder = new TextEncoder()
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const event of stream) {
+            if (event.type === 'response.output_text.delta') {
+              controller.enqueue(encoder.encode(event.delta))
+            }
+            // We intentionally ignore response.reasoning_text.delta events here
+            // to hide the thinking process from the end user.
+          }
+        } catch (err) {
+          console.error('Stream error:', err)
+          controller.error(err)
+        } finally {
+          controller.close()
+        }
+      },
+    })
 
-    return NextResponse.json({ narrative })
+    return new NextResponse(readableStream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     const errorDetails = error instanceof Error ? error.stack : String(error)
