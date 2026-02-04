@@ -76,8 +76,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!process.env.OPENROUTER_API_KEY) {
+      return NextResponse.json(
+        { error: 'OpenRouter API key not configured' },
+        { status: 500 }
+      )
+    }
+
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENROUTER_API_KEY,
+      baseURL: 'https://openrouter.ai/api/v1',
     })
 
     const userPrompt = buildUserPrompt({
@@ -89,15 +97,14 @@ export async function POST(request: NextRequest) {
     })
 
     const stream = await openai.responses.create({
-      model: 'gpt-5-mini',
-      reasoning: { effort: "minimal" },
-      text: { verbosity: "low" },
+      model: 'openai/gpt-oss-120b',
+      reasoning: { effort: "low" },
+      // text: { verbosity: "low" },
       input: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
-      // temperature: 0.7, // Unsupported by gpt-5-mini
-      max_output_tokens: 1000,
+      max_output_tokens: 8192,
       stream: true,
     })
 
