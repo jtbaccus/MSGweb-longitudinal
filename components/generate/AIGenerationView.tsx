@@ -16,13 +16,13 @@ export function AIGenerationView() {
     items,
     attributes,
     narrativeText,
-    generatedNarrative,
     editedGeneratedNarrative,
     isGenerating,
     generationError,
     currentTemplate,
     setGeneratedNarrative,
     setEditedGeneratedNarrative,
+    resetEditedNarrative,
     setIsGenerating,
     setGenerationError,
     getStrengths,
@@ -89,8 +89,14 @@ export function AIGenerationView() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const charCount = editedGeneratedNarrative.length
+
   const handleReset = () => {
-    setEditedGeneratedNarrative(generatedNarrative)
+    resetEditedNarrative()
+  }
+
+  const handleClear = () => {
+    setEditedGeneratedNarrative('')
   }
 
   if (!currentTemplate) {
@@ -185,41 +191,51 @@ export function AIGenerationView() {
       {(editedGeneratedNarrative || isGenerating) && (
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-status-success" />
-                Generated Narrative
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleReset} disabled={isGenerating}>
-                  <RotateCcw className="w-4 h-4 mr-1" />
-                  Reset
-                </Button>
-                <Button variant="primary" size="sm" onClick={handleCopy} disabled={isGenerating}>
-                  {copied ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 mr-1" />
-                      Copy
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-status-success" />
+              Generated Narrative
+            </CardTitle>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleCopy}
+              disabled={isGenerating}
+            >
+              {copied ? (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-1" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 mr-1" />
+                  Copy
+                </>
+              )}
+            </Button>
           </CardHeader>
           <CardContent>
             <TextArea
-              value={editedGeneratedNarrative}
-              onChange={(e) => setEditedGeneratedNarrative(e.target.value)}
-              rows={12}
-              showCharCount
-              className="min-h-[250px]"
-              disabled={isGenerating}
+                value={editedGeneratedNarrative}
+                onChange={(e) => setEditedGeneratedNarrative(e.target.value)}
+                rows={12}
+                className="min-h-[250px]"
+                disabled={isGenerating}
             />
+            <div className="flex justify-between items-center mt-1">
+              <p className="text-xs text-[rgb(var(--muted-foreground))]">
+                {charCount} characters
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleClear} disabled={isGenerating}>
+                  Clear
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleReset} disabled={isGenerating}>
+                  <RotateCcw className="w-4 h-4 mr-1" />
+                  Reset Narrative
+                </Button>
+              </div>
+            </div>
             <p className="text-xs text-[rgb(var(--muted-foreground))] mt-2">
               You can edit the generated narrative above before copying.
             </p>

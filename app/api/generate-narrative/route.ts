@@ -70,13 +70,6 @@ export async function POST(request: NextRequest) {
       narrativeContext,
     } = body
 
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
-        { status: 500 }
-      )
-    }
-
     if (!process.env.OPENROUTER_API_KEY) {
       return NextResponse.json(
         { error: 'OpenRouter API key not configured' },

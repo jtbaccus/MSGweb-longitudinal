@@ -27,6 +27,7 @@ interface EvaluationState {
   setNarrativeText: (text: string) => void
   setGeneratedNarrative: (text: string) => void
   setEditedGeneratedNarrative: (text: string) => void
+  resetEditedNarrative: () => void
   setIsGenerating: (isGenerating: boolean) => void
   setGenerationError: (error: string | null) => void
   resetForm: () => void
@@ -102,6 +103,9 @@ export const useEvaluationStore = create<EvaluationState>()(
       setNarrativeText: (text) => set({ narrativeText: text }),
       setGeneratedNarrative: (text) => set({ generatedNarrative: text, editedGeneratedNarrative: text }),
       setEditedGeneratedNarrative: (text) => set({ editedGeneratedNarrative: text }),
+      resetEditedNarrative: () => set((state) => ({
+        editedGeneratedNarrative: state.generatedNarrative
+      })),
       setIsGenerating: (isGenerating) => set({ isGenerating }),
       setGenerationError: (error) => set({ generationError: error }),
 
