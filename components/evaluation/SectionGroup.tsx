@@ -29,11 +29,11 @@ export function SectionGroup({ sectionName, items, category, color }: SectionGro
 
   return (
     <div className="rounded-lg border border-[rgb(var(--card-border))] overflow-hidden">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-3 py-2 bg-[rgb(var(--sidebar-background))] hover:bg-[rgb(var(--card-border))] transition-colors text-left"
-      >
-        <div className="flex items-center gap-2">
+      <div className="w-full flex items-center justify-between px-3 py-2 bg-[rgb(var(--sidebar-background))] hover:bg-[rgb(var(--card-border))] transition-colors text-left">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex-1 flex items-center gap-2"
+        >
           {isExpanded ? (
             <ChevronDown className="w-4 h-4 text-[rgb(var(--muted-foreground))]" />
           ) : (
@@ -43,7 +43,7 @@ export function SectionGroup({ sectionName, items, category, color }: SectionGro
           <span className="text-xs text-[rgb(var(--muted-foreground))]">
             ({selectedCount}/{items.length})
           </span>
-        </div>
+        </button>
 
         <button
           onClick={handleSelectAll}
@@ -56,7 +56,7 @@ export function SectionGroup({ sectionName, items, category, color }: SectionGro
         >
           {allSelected ? 'Deselect All' : 'Select All'}
         </button>
-      </button>
+      </div>
 
       {isExpanded && (
         <div className="p-2 space-y-2">
