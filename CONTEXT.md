@@ -3,18 +3,25 @@
 ## Status: Deployed (Vercel)
 
 ## Overview
-Next.js 14 web app for generating narrative evaluations for medical students on clinical clerkship rotations. Uses GPT-5.2 to produce strengths-only narratives based on selected Fail/Pass/Honors criteria.
+Next.js 16 web app for generating narrative evaluations for medical students on clinical clerkship rotations. Uses GPT-5-mini with streaming to produce strengths-only narratives based on selected Fail/Pass/Honors criteria.
 
 ## Tech Stack
-- Next.js 14 (App Router), TypeScript, Tailwind CSS
-- Zustand (state management)
-- OpenAI API (GPT-5.2) for narrative generation
+- Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS
+- Zustand 5 (state management)
+- OpenAI API (GPT-5-mini with streaming) for narrative generation
+- Vitest for unit testing
 
 ## Current Goals
 - Expand clerkship templates beyond Internal Medicine (currently only IM has full criteria)
 - Surgery, Pediatrics, Psychiatry, OB/GYN, Family Medicine have placeholder items
 
 ## Recent Changes
+- **2026-02-04:** Merged collaborator PRs (warshanks)
+  - Response streaming for narrative generation — text appears incrementally for better UX
+  - Changed model from gpt-5.2 → gpt-5-mini with minimal reasoning
+  - Fixed nested button hydration error in SectionGroup (accessibility fix)
+  - Added unit tests for SectionGroup component (`__tests__/SectionGroup.test.tsx`)
+  - Files changed: `app/api/generate-narrative/route.ts`, `components/generate/AIGenerationView.tsx`, `components/evaluation/SectionGroup.tsx`
 - **2026-01-28:** Added Neurology template — full 69-item evaluation (same structure as IM, `neuro-` ID prefix, `Activity` icon)
   - Files changed: `lib/data/templates.ts`, `components/templates/TemplateCard.tsx`
 
