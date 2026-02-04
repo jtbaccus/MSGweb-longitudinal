@@ -9,6 +9,7 @@ import { EvaluationSummaryView } from '@/components/summary/EvaluationSummaryVie
 import { AIGenerationView } from '@/components/generate/AIGenerationView'
 import { ExportReportView } from '@/components/export/ExportReportView'
 import { SettingsView } from '@/components/settings/SettingsView'
+import { NavigationButtons } from '@/components/layout/NavigationButtons'
 
 export function MainContent() {
   const currentTab = useNavigationStore(state => state.currentTab)
@@ -23,6 +24,8 @@ export function MainContent() {
       {currentTab === 'generate' && <AIGenerationView />}
       {currentTab === 'export' && <ExportReportView />}
       {currentTab === 'settings' && <SettingsView />}
+
+      <NavigationButtons />
     </main>
   )
 }
