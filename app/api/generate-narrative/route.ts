@@ -23,6 +23,7 @@ Do not write in a templated or checklist style. The narrative should read as a n
 **Opening sentence**
 - Always start with: "[Student Name] did a great job during their time on the {clerkship} Clerkship."
 - "[Student Name]" is a placeholder the evaluator will replace.
+- Include the [] brackets around the name as shown.
 
 **Paragraph structure**
 - The first paragraph should focus primarily on reliability, professionalism, and ownership. Avoid introducing clinical reasoning until paragraph two.
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
     })
 
     const stream = await openai.responses.create({
-      model: 'openai/gpt-oss-120b',
+      model: 'openai/gpt-oss-120b:nitro',
       reasoning: { effort: "low" },
       // text: { verbosity: "low" },
       input: [
