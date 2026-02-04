@@ -98,15 +98,16 @@ export function AIGenerationView() {
           let charCount = 1
 
           // Adaptive speed based on queue size
-          if (queueSize > 50) charCount = 5
-          else if (queueSize > 20) charCount = 2
+          if (queueSize > 150) charCount = 10
+          else if (queueSize > 50) charCount = 5
+          else if (queueSize > 25) charCount = 2
 
           const chunk = fullText.slice(displayedText.length, displayedText.length + charCount)
           displayedText += chunk
           setGeneratedNarrative(displayedText)
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 16))
+        await new Promise((resolve) => setTimeout(resolve, 8))
       }
 
       await fetchPromise
