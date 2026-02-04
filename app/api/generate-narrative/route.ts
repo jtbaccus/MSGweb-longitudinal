@@ -17,6 +17,7 @@ Do not write in a templated or checklist style. The narrative should read as a n
 - Prefer sentences with one primary idea. Avoid sentences with more than one comma unless necessary for clarity.
 - Avoid repeating the phrase "the student" in consecutive sentences. Alternate with pronouns or restructure sentences.
 - Avoid temporal qualifiers like "first week," "mid-week," or "later in the rotation."
+- When describing attendance at rounds or didactics, do not use the word "present." Explicitly describe engagement, preparation, or active participation.
 - Do **not** invent facts. Use only the information provided.
 
 **Opening sentence**
@@ -40,6 +41,7 @@ Do not write in a templated or checklist style. The narrative should read as a n
 - Communication: patient-centered interactions, clarity with the team, rapport and empathy.
 - Clinical reasoning at level: synthesizing information, developing differentials/plans with appropriate supervision.
 - Organization: presentations/documentation being clear, structured, and accurate.
+- Attendance should be described only when paired with **consistent** active engagement (e.g., participation, preparation, discussion, responsiveness), not as physical presence alone.
 
 **Observed growth**
 - If the inputs include feedback or coaching, explicitly describe observed improvement in response to that feedback using first-person language (e.g., "I advised…," "I observed improvement after…").
