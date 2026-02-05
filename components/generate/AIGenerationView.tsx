@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { TextArea } from '@/components/ui/TextArea'
 import { Badge } from '@/components/ui/Badge'
 import { useEvaluationStore } from '@/lib/stores/evaluationStore'
+import { useSettingsStore, WORD_COUNT_PRESETS } from '@/lib/stores/settingsStore'
 import { validateEvaluation } from '@/lib/utils/validation'
 import { getPerformanceLevelLabel } from '@/lib/utils/performanceLevel'
 import { Sparkles, Copy, RotateCcw, ExternalLink, CheckCircle, AlertTriangle } from 'lucide-react'
@@ -32,6 +33,10 @@ export function AIGenerationView() {
 
   const [copied, setCopied] = useState(false)
 
+  const wordCountRange = useSettingsStore(state => state.getWordCountRange)()
+  const wordCountPreset = useSettingsStore(state => state.wordCountPreset)
+  const activePresetConfig = WORD_COUNT_PRESETS.find(p => p.preset === wordCountPreset)
+
   const strengths = getStrengths()
   const selectedAttributes = getSelectedAttributes()
   const performanceLevel = getPerformanceLevel()
@@ -53,6 +58,8 @@ export function AIGenerationView() {
           strengths: strengths.map(s => s.name),
           attributes: selectedAttributes.map(a => a.name),
           narrativeContext: narrativeText,
+          minWords: wordCountRange.minWords,
+          maxWords: wordCountRange.maxWords,
         }),
       })
 
@@ -178,7 +185,7 @@ export function AIGenerationView() {
           <CardTitle className="text-base">Generation Input Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
             <div>
               <p className="text-[rgb(var(--muted-foreground))]">Template</p>
               <p className="font-medium">{currentTemplate.name}</p>
@@ -194,6 +201,10 @@ export function AIGenerationView() {
             <div>
               <p className="text-[rgb(var(--muted-foreground))]">Attributes</p>
               <p className="font-medium">{selectedAttributes.length} selected</p>
+            </div>
+            <div>
+              <p className="text-[rgb(var(--muted-foreground))]">Target Length</p>
+              <p className="font-medium">{activePresetConfig?.label} ({wordCountRange.minWords}–{wordCountRange.maxWords}w)</p>
             </div>
           </div>
         </CardContent>

@@ -5,7 +5,9 @@ import { ContentHeader } from '@/components/layout/ContentHeader'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useEvaluationStore } from '@/lib/stores/evaluationStore'
-import { Sun, Moon, Monitor, Trash2, CheckCircle, XCircle } from 'lucide-react'
+import { useSettingsStore, WORD_COUNT_PRESETS } from '@/lib/stores/settingsStore'
+import { WordCountPreset } from '@/lib/types'
+import { Sun, Moon, Monitor, Trash2, CheckCircle, XCircle, Ruler } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useEffect, useState } from 'react'
 
@@ -20,6 +22,9 @@ const themeOptions: { value: ThemeOption; label: string; icon: typeof Sun }[] = 
 export function SettingsView() {
   const { theme, setTheme } = useTheme()
   const resetAll = useEvaluationStore(state => state.resetAll)
+  const wordCountPreset = useSettingsStore(state => state.wordCountPreset)
+  const setWordCountPreset = useSettingsStore(state => state.setWordCountPreset)
+  const activePreset = WORD_COUNT_PRESETS.find(p => p.preset === wordCountPreset)!
   const [mounted, setMounted] = useState(false)
   const [apiStatus, setApiStatus] = useState<'checking' | 'ok' | 'error'>('checking')
 
@@ -78,6 +83,59 @@ export function SettingsView() {
                 </button>
               )
             })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Narrative Length */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Ruler className="w-5 h-5" />
+            Narrative Length
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-[rgb(var(--muted-foreground))] mb-4">
+            Choose how long generated narratives should be.
+          </p>
+
+          {/* Preset labels */}
+          <div className="flex justify-between mb-2 px-1">
+            {WORD_COUNT_PRESETS.map((p) => (
+              <button
+                key={p.preset}
+                onClick={() => setWordCountPreset(p.preset)}
+                className={clsx(
+                  'text-xs font-medium px-2 py-1 rounded transition-colors',
+                  p.preset === wordCountPreset
+                    ? 'text-medical-primary bg-medical-primary/10'
+                    : 'text-[rgb(var(--muted-foreground))] hover:text-[rgb(var(--foreground))]'
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Slider */}
+          <input
+            type="range"
+            min={1}
+            max={4}
+            step={1}
+            value={wordCountPreset}
+            onChange={(e) => setWordCountPreset(Number(e.target.value) as WordCountPreset)}
+            className="w-full accent-medical-primary cursor-pointer"
+          />
+
+          {/* Detail card */}
+          <div className="mt-4 p-3 rounded-lg bg-[rgb(var(--card-bg))]/50 border border-[rgb(var(--card-border))]">
+            <p className="text-sm font-medium">{activePreset.label}</p>
+            <p className="text-xs text-[rgb(var(--muted-foreground))] mt-1">{activePreset.description}</p>
+            <p className="text-xs text-medical-primary mt-1 font-medium">
+              {activePreset.range.minWords}–{activePreset.range.maxWords} words
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -58,3 +58,17 @@ export interface NavigationItem {
 }
 
 export type ThemeMode = 'light' | 'dark' | 'system'
+
+export type WordCountPreset = 1 | 2 | 3 | 4
+
+export interface WordCountRange {
+  minWords: number
+  maxWords: number
+}
+
+export interface WordCountPresetConfig {
+  preset: WordCountPreset
+  label: string
+  description: string
+  range: WordCountRange
+}
