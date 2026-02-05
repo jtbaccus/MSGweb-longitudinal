@@ -80,6 +80,10 @@ export async function POST(request: NextRequest) {
     const openai = new OpenAI({
       apiKey: process.env.OPENROUTER_API_KEY,
       baseURL: 'https://openrouter.ai/api/v1',
+      defaultHeaders: {
+        'HTTP-Referer': 'https://ms-gweb.vercel.app/',
+        'X-Title': 'MS-G Web',
+      },
     })
 
     const userPrompt = buildUserPrompt({
@@ -98,7 +102,7 @@ export async function POST(request: NextRequest) {
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
-      max_output_tokens: 8192,
+      max_output_tokens: 16384,
       stream: true,
     })
 
