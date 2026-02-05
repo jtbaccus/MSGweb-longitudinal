@@ -16,12 +16,17 @@ Next.js 16 web app for generating narrative evaluations for medical students on 
 - Surgery, Pediatrics, Psychiatry, OB/GYN, Family Medicine have placeholder items
 
 ## Recent Changes
+- **2026-02-05:** Merged smooth narrative streaming (warshanks PR #6)
+  - Added adaptive typewriter effect for AI narrative display — buffers incoming stream and renders smoothly regardless of chunk size
+  - Smooth display loop with adaptive character count based on queue size (1-10 chars per frame)
+  - Files changed: `components/generate/AIGenerationView.tsx`
 - **2026-02-04:** Merged collaborator PRs (warshanks)
   - Response streaming for narrative generation — text appears incrementally for better UX
   - Changed model from gpt-5.2 → gpt-5-mini with minimal reasoning
   - Fixed nested button hydration error in SectionGroup (accessibility fix)
-  - Added unit tests for SectionGroup component (`__tests__/SectionGroup.test.tsx`)
-  - Files changed: `app/api/generate-narrative/route.ts`, `components/generate/AIGenerationView.tsx`, `components/evaluation/SectionGroup.tsx`
+  - Added Next/Back navigation buttons for step-through workflow
+  - Added unit tests for SectionGroup and NavigationButtons components
+  - Files changed: `app/api/generate-narrative/route.ts`, `components/generate/AIGenerationView.tsx`, `components/evaluation/SectionGroup.tsx`, `components/layout/NavigationButtons.tsx`
 - **2026-01-28:** Added Neurology template — full 69-item evaluation (same structure as IM, `neuro-` ID prefix, `Activity` icon)
   - Files changed: `lib/data/templates.ts`, `components/templates/TemplateCard.tsx`
 
