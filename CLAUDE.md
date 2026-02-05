@@ -11,10 +11,12 @@ Next.js web application for generating narrative evaluations for medical student
 - OpenAI API (GPT-5.2)
 
 ## Key Files
-- `app/api/generate-narrative/route.ts` - OpenAI API integration
+- `app/api/generate-narrative/route.ts` - OpenAI API integration (`buildSystemPrompt` with dynamic word count)
 - `lib/data/templates.ts` - Clerkship evaluation criteria (Fail/Pass/Honors)
-- `lib/stores/evaluationStore.ts` - Zustand store for evaluation state
+- `lib/stores/evaluationStore.ts` - Zustand store for evaluation state (clears on load)
+- `lib/stores/settingsStore.ts` - Zustand store for user preferences (persists via localStorage)
 - `components/evaluation/` - UI components for evaluation workflow
+- `components/settings/SettingsView.tsx` - Settings page with theme, narrative length, API status
 
 ## Commands
 ```bash

@@ -16,6 +16,13 @@ Next.js 16 web app for generating narrative evaluations for medical students on 
 - Surgery, Pediatrics, Psychiatry, OB/GYN, Family Medicine have placeholder items
 
 ## Recent Changes
+- **2026-02-05:** Added narrative length preset slider to Settings
+  - New `settingsStore` (Zustand + persist middleware, separate from evaluationStore)
+  - 4 presets: Concise (75–125w), Standard (120–190w), Detailed (180–275w), Comprehensive (250–350w)
+  - Slider in Settings between Appearance and AI Status cards
+  - Word count sent to API and interpolated into system prompt dynamically
+  - Generate view Input Summary shows selected target length
+  - Files changed: `lib/stores/settingsStore.ts` (new), `lib/types/index.ts`, `components/settings/SettingsView.tsx`, `components/generate/AIGenerationView.tsx`, `app/api/generate-narrative/route.ts`, `tsconfig.json`
 - **2026-02-05:** Integrated Jon's narrative writing style into system prompt
   - Added two few-shot examples (HONORS and PASS level Internal Medicine narratives)
   - Refined closing sentence guidance with calibrated language per performance level
@@ -46,7 +53,9 @@ Next.js 16 web app for generating narrative evaluations for medical students on 
 
 ## Key Files
 - `lib/data/templates.ts` — Clerkship evaluation criteria
-- `lib/stores/evaluationStore.ts` — Zustand state
-- `app/api/generate-narrative/route.ts` — OpenAI integration
+- `lib/stores/evaluationStore.ts` — Zustand state (evaluation data, clears on load)
+- `lib/stores/settingsStore.ts` — Zustand state (user preferences, persists in localStorage)
+- `app/api/generate-narrative/route.ts` — OpenAI integration (dynamic word count via `buildSystemPrompt`)
 - `components/evaluation/` — Evaluation workflow UI
+- `components/settings/SettingsView.tsx` — Settings page (theme, narrative length, API status, data management)
 - `components/templates/TemplateCard.tsx` — Template selection cards
