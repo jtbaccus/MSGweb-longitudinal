@@ -16,6 +16,12 @@ Next.js 16 web app for generating narrative evaluations for medical students on 
 - Surgery, Pediatrics, Psychiatry, OB/GYN, Family Medicine have placeholder items
 
 ## Recent Changes
+- **2026-02-05:** Integrated Jon's narrative writing style into system prompt
+  - Added two few-shot examples (HONORS and PASS level Internal Medicine narratives)
+  - Refined closing sentence guidance with calibrated language per performance level
+  - Simplified first-person usage to "use sparingly, vary naturally"
+  - Added explicit anti-boilerplate section (avoid generic praise, flowery language)
+  - Files changed: `app/api/generate-narrative/route.ts`, `CLAUDE.md`
 - **2026-02-05:** Merged smooth narrative streaming (warshanks PR #6)
   - Added adaptive typewriter effect for AI narrative display — buffers incoming stream and renders smoothly regardless of chunk size
   - Smooth display loop with adaptive character count based on queue size (1-10 chars per frame)
