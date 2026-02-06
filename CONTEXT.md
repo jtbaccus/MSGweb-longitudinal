@@ -14,14 +14,14 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 
 ## Current Status
 
-- **Phase:** Phase 2 complete — Database Schema implemented, ready for Phase 3 (TypeScript Types)
+- **Phase:** Phase 3 complete — TypeScript Types implemented, ready for Phase 4 (API Routes)
 - **Upgrade plan:** See `UPGRADE-PATH.md` for the full 8-phase plan
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
 
 1. ~~Authentication (NextAuth.js + Supabase)~~ — Done
 2. ~~Database Schema (Prisma + PostgreSQL)~~ — Done
-3. TypeScript Types
+3. ~~TypeScript Types~~ — Done
 4. API Routes
 5. State Management
 6. UI Components
@@ -65,3 +65,15 @@ Implemented 2026-02-06:
 - Cascade deletes from `StudentEnrollment` to `Evaluation` and `ProgressSummary`
 - `npx prisma generate` succeeds, build clean, all 164 tests pass
 - Tables created via `npx prisma db push` when connected to database
+
+## Phase 3 Summary (TypeScript Types)
+
+Implemented 2026-02-06:
+- Created `lib/types/longitudinal.ts` with:
+  - 4 enum type aliases as string unions (`ClerkshipType`, `EvaluationFrequency`, `SummaryType`, `EnrollmentStatus`) — decoupled from Prisma imports for client-component compatibility
+  - 6 model interfaces (`Clerkship`, `Student`, `Rotation`, `StudentEnrollment`, `SavedEvaluation`, `ProgressSummary`) matching Prisma schema
+  - 3 view types (`StudentProgressView`, `PeriodStatus`, `PerformanceTrend`)
+  - `LongitudinalNavigationTab` extending existing `NavigationTab`
+- Created `lib/utils/performanceLevelMapping.ts` — bidirectional mapping between UI lowercase (`'fail'|'pass'|'honors'`) and Prisma uppercase (`'FAIL'|'PASS'|'HONORS'`)
+- Updated `lib/types/index.ts` — re-exports all 14 new types (additive only)
+- Build clean, all 164 tests pass unchanged
