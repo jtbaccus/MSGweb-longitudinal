@@ -10,8 +10,10 @@ import {
   Sparkles,
   Download,
   Settings,
+  LogOut,
   type LucideIcon,
 } from 'lucide-react'
+import { useSession, signOut } from 'next-auth/react'
 import { NavigationTab } from '@/lib/types'
 import { useNavigationStore } from '@/lib/stores/navigationStore'
 import { useEvaluationStore } from '@/lib/stores/evaluationStore'
@@ -36,6 +38,7 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const { currentTab, setCurrentTab } = useNavigationStore()
   const currentTemplate = useEvaluationStore(state => state.currentTemplate)
+  const { data: session } = useSession()
 
   return (
     <aside className="w-56 sidebar-bg border-r border-[rgb(var(--sidebar-border))] flex flex-col h-full">
@@ -81,6 +84,19 @@ export function Sidebar() {
         <div className="p-4 border-t border-[rgb(var(--sidebar-border))]">
           <p className="text-xs text-[rgb(var(--muted-foreground))] mb-1">Current Template</p>
           <p className="text-sm font-medium truncate">{currentTemplate.name}</p>
+        </div>
+      )}
+
+      {session?.user && (
+        <div className="p-4 border-t border-[rgb(var(--sidebar-border))]">
+          <p className="text-sm font-medium truncate">{session.user.name || session.user.email}</p>
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="mt-2 w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--card-background))] transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </button>
         </div>
       )}
     </aside>
