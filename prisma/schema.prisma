@@ -13,6 +13,36 @@ enum UserRole {
   USER
 }
 
+enum ClerkshipType {
+  STANDARD      // 1-2 weeks, single evaluation
+  MULTI_WEEK    // 8 weeks, weekly evaluations
+  LONGITUDINAL  // 6 months, periodic evaluations
+}
+
+enum EvaluationFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+}
+
+enum PerformanceLevel {
+  FAIL
+  PASS
+  HONORS
+}
+
+enum SummaryType {
+  MID_COURSE    // Halfway point summary
+  END_OF_COURSE // Final summary
+  PROGRESS      // Ad-hoc progress note
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -26,6 +56,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
+  evaluations   Evaluation[]
+  summaries     ProgressSummary[]
 }
 
 model Account {
@@ -61,4 +93,128 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// ============================================
+// Clerkship & Rotation Models
+// ============================================
+
+model Clerkship {
+  id                  String               @id @default(cuid())
+  name                String               // "Internal Medicine", "Neurology", etc.
+  templateId          String               // Links to existing templates.ts
+  type                ClerkshipType        @default(STANDARD)
+  durationWeeks       Int                  // 1, 2, 8, or 26 (6 months)
+  midpointWeek        Int?                 // Week number for mid-course feedback
+  evaluationFrequency EvaluationFrequency? // For LONGITUDINAL type
+  createdAt           DateTime             @default(now())
+  rotations           Rotation[]
+}
+
+model Rotation {
+  id           String              @id @default(cuid())
+  clerkshipId  String
+  clerkship    Clerkship           @relation(fields: [clerkshipId], references: [id])
+  startDate    DateTime
+  endDate      DateTime
+  academicYear String              // "2025-2026"
+  createdAt    DateTime            @default(now())
+  enrollments  StudentEnrollment[]
+}
+
+// ============================================
+// Student Models
+// ============================================
+
+model Student {
+  id              String              @id @default(cuid())
+  name            String
+  email           String?             @unique
+  medicalSchoolId String?             // External ID from school system
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  enrollments     StudentEnrollment[]
+}
+
+model StudentEnrollment {
+  id          String           @id @default(cuid())
+  studentId   String
+  student     Student          @relation(fields: [studentId], references: [id])
+  rotationId  String
+  rotation    Rotation         @relation(fields: [rotationId], references: [id])
+  startDate   DateTime         // Student's actual start (may differ from rotation)
+  endDate     DateTime?
+  status      EnrollmentStatus @default(ACTIVE)
+  createdAt   DateTime         @default(now())
+  evaluations Evaluation[]
+  summaries   ProgressSummary[]
+
+  @@unique([studentId, rotationId])
+}
+
+// ============================================
+// Evaluation Models
+// ============================================
+
+model Evaluation {
+  id                   String            @id @default(cuid())
+  enrollmentId         String
+  enrollment           StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  evaluatorId          String?
+  evaluator            User?             @relation(fields: [evaluatorId], references: [id])
+  evaluatorName        String            // Display name (may differ from User.name)
+  periodNumber         Int               // Week or month number depending on frequency
+  evaluationDate       DateTime
+
+  // Core evaluation data
+  performanceLevel     PerformanceLevel
+  selectedCriteriaIds  String[]          // Array of item IDs from template
+  selectedAttributeIds String[]          // Array of attribute IDs
+  narrativeContext     String?           @db.Text
+  generatedNarrative   String?           @db.Text
+  editedNarrative      String?           @db.Text
+
+  // Metadata
+  templateId           String            // Which template version was used
+  isComplete           Boolean           @default(false)
+  isDraft              Boolean           @default(true)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  submittedAt          DateTime?
+
+  @@index([enrollmentId])
+  @@index([periodNumber])
+}
+
+// ============================================
+// Progress Summary Models
+// ============================================
+
+model ProgressSummary {
+  id                  String            @id @default(cuid())
+  enrollmentId        String
+  enrollment          StudentEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  authorId            String?
+  author              User?             @relation(fields: [authorId], references: [id])
+  authorName          String            // For display
+  type                SummaryType
+
+  // Aggregated data
+  evaluationsIncluded String[]          // IDs of evaluations analyzed
+  overallPerformance  PerformanceLevel
+
+  // AI-generated content
+  strengthsSummary    String?           @db.Text
+  growthAreasSummary  String?           @db.Text
+  progressNarrative   String?           @db.Text
+
+  // Director edits
+  editedNarrative     String?           @db.Text
+  recommendations     String?           @db.Text
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([enrollmentId])
+  @@index([type])
 }

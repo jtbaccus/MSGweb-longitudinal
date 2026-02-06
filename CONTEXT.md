@@ -14,14 +14,13 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 
 ## Current Status
 
-- **Phase:** Phase 1 complete — Authentication live, ready for Phase 2 (Database Schema)
+- **Phase:** Phase 2 complete — Database Schema implemented, ready for Phase 3 (TypeScript Types)
 - **Upgrade plan:** See `UPGRADE-PATH.md` for the full 8-phase plan
-- **Phase 2 plan:** See `.claude/plans/rosy-herding-raven.md` for implementation details
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
 
-1. Authentication (NextAuth.js + Supabase)
-2. Database Schema (Prisma + PostgreSQL)
+1. ~~Authentication (NextAuth.js + Supabase)~~ — Done
+2. ~~Database Schema (Prisma + PostgreSQL)~~ — Done
 3. TypeScript Types
 4. API Routes
 5. State Management
@@ -54,3 +53,15 @@ Implemented 2026-02-06:
 - Seeded admin account (`admin@example.com` / `changeme`, forced to change on first login)
 - `lib/api-auth.ts`: `requireAuth()` helper for API routes
 - All 164 existing tests pass
+
+## Phase 2 Summary (Database Schema)
+
+Implemented 2026-02-06:
+- 5 new enums: `ClerkshipType`, `EvaluationFrequency`, `EnrollmentStatus`, `PerformanceLevel`, `SummaryType`
+- 6 new models: `Clerkship`, `Rotation`, `Student`, `StudentEnrollment`, `Evaluation`, `ProgressSummary`
+- `User` model: added `evaluations` and `summaries` relation fields (Phase 1 fields preserved)
+- Indexes on `Evaluation` (enrollmentId, periodNumber) and `ProgressSummary` (enrollmentId, type)
+- Unique constraint on `StudentEnrollment` (studentId, rotationId)
+- Cascade deletes from `StudentEnrollment` to `Evaluation` and `ProgressSummary`
+- `npx prisma generate` succeeds, build clean, all 164 tests pass
+- Tables created via `npx prisma db push` when connected to database
