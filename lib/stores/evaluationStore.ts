@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { EvaluationItem, PersonalAttribute, ClerkshipTemplate, PerformanceLevel } from '@/lib/types'
 import { defaultPersonalAttributes } from '@/lib/data/templates'
 import { calculatePerformanceLevel } from '@/lib/utils/performanceLevel'
+import { toDbPerformanceLevel } from '@/lib/utils/performanceLevelMapping'
 
 // Clear any previously persisted evaluation data on load
 if (typeof window !== 'undefined') {
@@ -18,6 +19,10 @@ interface EvaluationState {
   isGenerating: boolean
   generationError: string | null
 
+  // Longitudinal context (optional — set when editing within a longitudinal enrollment)
+  enrollmentId?: string
+  periodNumber?: number
+
   // Actions
   loadTemplate: (template: ClerkshipTemplate) => void
   toggleItem: (itemId: string) => void
@@ -32,6 +37,12 @@ interface EvaluationState {
   setGenerationError: (error: string | null) => void
   resetForm: () => void
   resetAll: () => void
+
+  // Longitudinal actions
+  setLongitudinalContext: (enrollmentId: string, periodNumber: number) => void
+  clearLongitudinalContext: () => void
+  saveToDatabase: () => Promise<void>
+  loadFromDatabase: (evaluationId: string) => Promise<void>
 
   // Selectors (computed)
   getStrengths: () => EvaluationItem[]
@@ -51,6 +62,8 @@ export const useEvaluationStore = create<EvaluationState>()(
       currentTemplate: null,
       isGenerating: false,
       generationError: null,
+      enrollmentId: undefined,
+      periodNumber: undefined,
 
       loadTemplate: (template) => {
         const itemsWithSelection = template.items.map(item => ({
@@ -117,6 +130,8 @@ export const useEvaluationStore = create<EvaluationState>()(
           generatedNarrative: '',
           editedGeneratedNarrative: '',
           generationError: null,
+          enrollmentId: undefined,
+          periodNumber: undefined,
         }))
       },
 
@@ -130,7 +145,96 @@ export const useEvaluationStore = create<EvaluationState>()(
           currentTemplate: null,
           isGenerating: false,
           generationError: null,
+          enrollmentId: undefined,
+          periodNumber: undefined,
         })
+      },
+
+      setLongitudinalContext: (enrollmentId, periodNumber) =>
+        set({ enrollmentId, periodNumber }),
+
+      clearLongitudinalContext: () =>
+        set({ enrollmentId: undefined, periodNumber: undefined }),
+
+      saveToDatabase: async () => {
+        const state = get()
+        if (!state.enrollmentId || !state.currentTemplate) {
+          throw new Error('Missing enrollment context or template')
+        }
+
+        const performanceLevel = toDbPerformanceLevel(state.getPerformanceLevel())
+        const selectedCriteriaIds = state.items
+          .filter((item) => item.isSelected)
+          .map((item) => item.id)
+        const selectedAttributeIds = state.attributes
+          .filter((attr) => attr.isSelected)
+          .map((attr) => attr.id)
+
+        const body = {
+          evaluatorName: '',
+          periodNumber: state.periodNumber,
+          evaluationDate: new Date().toISOString(),
+          performanceLevel,
+          selectedCriteriaIds,
+          selectedAttributeIds,
+          narrativeContext: state.narrativeText || null,
+          generatedNarrative: state.generatedNarrative || null,
+          editedNarrative: state.editedGeneratedNarrative || null,
+          templateId: state.currentTemplate.id,
+          isDraft: true,
+        }
+
+        const response = await fetch(
+          `/api/enrollments/${state.enrollmentId}/evaluations`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          }
+        )
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Failed to save evaluation')
+        }
+      },
+
+      loadFromDatabase: async (evaluationId) => {
+        const response = await fetch(`/api/evaluations/${evaluationId}`)
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Failed to load evaluation')
+        }
+        const evaluation = await response.json()
+
+        // Find and load the matching template
+        const { currentTemplate } = get()
+        if (currentTemplate && currentTemplate.id === evaluation.templateId) {
+          // Template already loaded — update selection state
+          set((state) => ({
+            items: state.items.map((item) => ({
+              ...item,
+              isSelected: evaluation.selectedCriteriaIds.includes(item.id),
+            })),
+            attributes: state.attributes.map((attr) => ({
+              ...attr,
+              isSelected: evaluation.selectedAttributeIds.includes(attr.id),
+            })),
+            narrativeText: evaluation.narrativeContext || '',
+            generatedNarrative: evaluation.generatedNarrative || '',
+            editedGeneratedNarrative: evaluation.editedNarrative || evaluation.generatedNarrative || '',
+            enrollmentId: evaluation.enrollmentId,
+            periodNumber: evaluation.periodNumber,
+          }))
+        } else {
+          // Template not loaded — set what we can
+          set({
+            narrativeText: evaluation.narrativeContext || '',
+            generatedNarrative: evaluation.generatedNarrative || '',
+            editedGeneratedNarrative: evaluation.editedNarrative || evaluation.generatedNarrative || '',
+            enrollmentId: evaluation.enrollmentId,
+            periodNumber: evaluation.periodNumber,
+          })
+        }
       },
 
       getStrengths: () => {

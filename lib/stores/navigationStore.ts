@@ -1,9 +1,9 @@
 import { create } from 'zustand'
-import { NavigationTab } from '@/lib/types'
+import { LongitudinalNavigationTab } from '@/lib/types'
 
 interface NavigationState {
-  currentTab: NavigationTab
-  setCurrentTab: (tab: NavigationTab) => void
+  currentTab: LongitudinalNavigationTab
+  setCurrentTab: (tab: LongitudinalNavigationTab) => void
 }
 
 export const useNavigationStore = create<NavigationState>()((set) => ({

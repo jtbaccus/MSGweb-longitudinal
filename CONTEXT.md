@@ -14,7 +14,7 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 
 ## Current Status
 
-- **Phase:** Phase 3 complete — TypeScript Types implemented, ready for Phase 4 (API Routes)
+- **Phase:** Phase 6 complete — UI Components implemented, ready for Phase 7 (AI Summary Generation)
 - **Upgrade plan:** See `UPGRADE-PATH.md` for the full 8-phase plan
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
@@ -22,9 +22,9 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 1. ~~Authentication (NextAuth.js + Supabase)~~ — Done
 2. ~~Database Schema (Prisma + PostgreSQL)~~ — Done
 3. ~~TypeScript Types~~ — Done
-4. API Routes
-5. State Management
-6. UI Components
+4. ~~API Routes~~ — Done
+5. ~~State Management~~ — Done
+6. ~~UI Components~~ — Done
 7. AI Summary Generation
 8. Verification & Testing
 
@@ -76,4 +76,69 @@ Implemented 2026-02-06:
   - `LongitudinalNavigationTab` extending existing `NavigationTab`
 - Created `lib/utils/performanceLevelMapping.ts` — bidirectional mapping between UI lowercase (`'fail'|'pass'|'honors'`) and Prisma uppercase (`'FAIL'|'PASS'|'HONORS'`)
 - Updated `lib/types/index.ts` — re-exports all 14 new types (additive only)
+- Build clean, all 164 tests pass unchanged
+
+## Phase 4 Summary (API Routes)
+
+Implemented 2026-02-06:
+- Added `zod` (v4) for input validation (already present in dependencies)
+- Created `lib/api-helpers.ts` — shared response helpers: `apiError()`, `validationError()`, `handlePrismaError()` (P2002→409, P2025→404, P2003→400)
+- Created `lib/validations/schemas.ts` — 11 Zod schemas with refinements (LONGITUDINAL requires frequency, midpointWeek < durationWeeks, endDate > startDate)
+- Created `lib/utils/csv.ts` — `parseCSV()` for student roster imports (splits on commas, validates required columns)
+- Created `lib/utils/progress.ts` — pure calculation functions: `calculateTotalPeriods()`, `calculateCurrentPeriod()`, `calculateTrend()`, `calculatePeriodStatuses()` (reusable by Phase 5 store)
+- Created 14 API route files:
+  - `/api/students` (GET w/ search, POST), `/api/students/[id]` (GET/PUT/DELETE), `/api/students/import` (POST CSV)
+  - `/api/clerkships` (GET w/ type filter, POST), `/api/clerkships/[id]` (GET/PUT/DELETE)
+  - `/api/rotations` (GET w/ filters, POST), `/api/rotations/[id]` (GET/PUT/DELETE)
+  - `/api/enrollments` (GET w/ filters, POST), `/api/enrollments/[id]` (GET/PUT/DELETE)
+  - `/api/enrollments/[id]/evaluations` (GET, POST — sets evaluatorId from session)
+  - `/api/evaluations/[id]` (GET/PUT/DELETE — guards against editing submitted evaluations)
+  - `/api/evaluations/[id]/submit` (POST — sets isComplete=true, isDraft=false, submittedAt=now())
+  - `/api/progress/[enrollmentId]` (GET — returns full `StudentProgressView` with trend calculation)
+  - `/api/generate-summary` (POST — stub returning 501, Phase 7 implements)
+- All routes use `requireAuth()`, Zod validation on POST/PUT, `handlePrismaError()` in catch blocks
+- Consistent error format: `{ error: string, details?: Record<string, string[]> }`
+- Build clean, all 164 tests pass unchanged
+
+## Phase 5 Summary (State Management)
+
+Implemented 2026-02-06:
+- Created `lib/stores/longitudinalStore.ts` — main Zustand store for longitudinal data:
+  - Mode toggle (`single` | `longitudinal`), persisted to localStorage
+  - Current context: `currentStudent`, `currentEnrollment`, `currentRotation`, `currentClerkship`
+  - Entity lists: `students[]`, `clerkships[]`, `rotations[]`
+  - Enrollment data: `evaluations[]`, `summaries[]`
+  - Async actions: `loadStudents()`, `loadClerkships()`, `loadRotations()`, `loadStudentProgress()`, `saveEvaluation()`, `submitEvaluation()`, `generateSummary()`
+  - Computed getters: `getProgressView()`, `getPeriodStatuses()`, `getPerformanceTrend()`
+  - All async actions check `response.ok` and throw with API error message on failure
+  - Reuses `calculateTotalPeriods`, `calculateCurrentPeriod`, `calculateTrend`, `calculatePeriodStatuses` from `lib/utils/progress.ts`
+- Modified `lib/stores/evaluationStore.ts` — added longitudinal context:
+  - Optional fields: `enrollmentId`, `periodNumber`
+  - Actions: `setLongitudinalContext()`, `clearLongitudinalContext()`, `saveToDatabase()`, `loadFromDatabase()`
+  - `saveToDatabase()` converts UI lowercase performance levels to API uppercase via `toDbPerformanceLevel()`
+  - `loadFromDatabase()` hydrates store from API evaluation data (criteria selection, attributes, narratives)
+  - Both `resetForm()` and `resetAll()` clear longitudinal context
+- Build clean, all 164 tests pass unchanged
+
+## Phase 6 Summary (UI Components)
+
+Implemented 2026-02-06:
+- Extended `lib/stores/navigationStore.ts` — `currentTab` type widened from `NavigationTab` to `LongitudinalNavigationTab` (backward-compatible union)
+- Updated `components/layout/Sidebar.tsx` — mode-conditional navigation:
+  - Single mode: existing 8-tab workflow (unchanged)
+  - Longitudinal mode: Dashboard, Students, Progress, Mid-Course, End-Course, Settings
+  - Context footer shows current student name (longitudinal) or template name (single)
+  - Enrollment-required tabs (Progress, Mid-Course, End-Course) disabled until enrollment loaded
+- Updated `components/layout/MainContent.tsx` — routes to 5 new longitudinal views
+- Updated `components/settings/SettingsView.tsx` — Workflow Mode toggle card between Appearance and Narrative Length
+- Updated `components/layout/NavigationButtons.tsx` — cast fix for widened tab type (existing `indexOf === -1 → null` behavior preserved)
+- Created `components/longitudinal/DashboardView.tsx` — quick stats (students, rotations, enrollments, completion rate) + active rotations list with progress bars
+- Created `components/longitudinal/StudentListView.tsx` — searchable student list with debounced search, expandable enrollment sections, enrollment → progress navigation
+- Created `components/longitudinal/CSVImportModal.tsx` — modal for CSV paste/upload, preview, import via `/api/students/import`, results display
+- Created `components/longitudinal/StudentProgressView.tsx` — full progress detail: info cards, completion bar, period timeline, performance chart, evaluations list with performance badges, summaries section with Phase 7 placeholder buttons
+- Created `components/longitudinal/PeriodTimeline.tsx` — horizontal timeline of connected circles, color-coded by performance level (green/purple/red/orange/gray), current period pulse animation, hover tooltips
+- Created `components/longitudinal/PerformanceChart.tsx` — pure SVG line chart (no new dependencies), Y-axis: Fail/Pass/Honors levels, colored data points, optional midpoint reference line
+- Created `components/longitudinal/MidCourseSummaryView.tsx` — stub placeholder for Phase 7
+- Created `components/longitudinal/EndCourseSummaryView.tsx` — stub placeholder for Phase 7
+- No new npm dependencies added
 - Build clean, all 164 tests pass unchanged

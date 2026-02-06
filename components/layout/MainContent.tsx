@@ -10,6 +10,11 @@ import { AIGenerationView } from '@/components/generate/AIGenerationView'
 import { ExportReportView } from '@/components/export/ExportReportView'
 import { SettingsView } from '@/components/settings/SettingsView'
 import { NavigationButtons } from '@/components/layout/NavigationButtons'
+import { DashboardView } from '@/components/longitudinal/DashboardView'
+import { StudentListView } from '@/components/longitudinal/StudentListView'
+import { StudentProgressView } from '@/components/longitudinal/StudentProgressView'
+import { MidCourseSummaryView } from '@/components/longitudinal/MidCourseSummaryView'
+import { EndCourseSummaryView } from '@/components/longitudinal/EndCourseSummaryView'
 
 export function MainContent() {
   const currentTab = useNavigationStore(state => state.currentTab)
@@ -24,6 +29,12 @@ export function MainContent() {
       {currentTab === 'generate' && <AIGenerationView />}
       {currentTab === 'export' && <ExportReportView />}
       {currentTab === 'settings' && <SettingsView />}
+
+      {currentTab === 'dashboard' && <DashboardView />}
+      {currentTab === 'students' && <StudentListView />}
+      {currentTab === 'progress' && <StudentProgressView />}
+      {currentTab === 'mid-course' && <MidCourseSummaryView />}
+      {currentTab === 'end-course' && <EndCourseSummaryView />}
 
       <NavigationButtons />
     </main>

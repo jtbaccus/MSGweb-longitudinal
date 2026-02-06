@@ -6,8 +6,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useEvaluationStore } from '@/lib/stores/evaluationStore'
 import { useSettingsStore, WORD_COUNT_PRESETS } from '@/lib/stores/settingsStore'
+import { useLongitudinalStore } from '@/lib/stores/longitudinalStore'
+import { useNavigationStore } from '@/lib/stores/navigationStore'
 import { WordCountPreset } from '@/lib/types'
-import { Sun, Moon, Monitor, Trash2, CheckCircle, XCircle, Ruler } from 'lucide-react'
+import { Sun, Moon, Monitor, Trash2, CheckCircle, XCircle, Ruler, ClipboardList, TrendingUp } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useEffect, useState } from 'react'
 
@@ -24,6 +26,9 @@ export function SettingsView() {
   const resetAll = useEvaluationStore(state => state.resetAll)
   const wordCountPreset = useSettingsStore(state => state.wordCountPreset)
   const setWordCountPreset = useSettingsStore(state => state.setWordCountPreset)
+  const mode = useLongitudinalStore(state => state.mode)
+  const setMode = useLongitudinalStore(state => state.setMode)
+  const setCurrentTab = useNavigationStore(state => state.setCurrentTab)
   const activePreset = WORD_COUNT_PRESETS.find(p => p.preset === wordCountPreset)!
   const [mounted, setMounted] = useState(false)
   const [apiStatus, setApiStatus] = useState<'checking' | 'ok' | 'error'>('checking')
@@ -80,6 +85,46 @@ export function SettingsView() {
                 >
                   <Icon className="w-6 h-6" />
                   <span className="text-sm font-medium">{option.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Workflow Mode */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Workflow Mode</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-[rgb(var(--muted-foreground))] mb-4">
+            Switch between single evaluation and longitudinal tracking workflows.
+          </p>
+          <div className="flex gap-3">
+            {([
+              { value: 'single' as const, label: 'Single Evaluation', icon: ClipboardList, desc: 'Evaluate one student at a time' },
+              { value: 'longitudinal' as const, label: 'Longitudinal Tracking', icon: TrendingUp, desc: 'Track students across rotations' },
+            ]).map((option) => {
+              const Icon = option.icon
+              const isSelected = mode === option.value
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    setMode(option.value)
+                    setCurrentTab(option.value === 'longitudinal' ? 'dashboard' : 'templates')
+                  }}
+                  className={clsx(
+                    'flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border transition-all',
+                    isSelected
+                      ? 'bg-medical-primary/10 border-medical-primary text-medical-primary'
+                      : 'border-[rgb(var(--card-border))] hover:border-[rgb(var(--muted))]'
+                  )}
+                >
+                  <Icon className="w-6 h-6" />
+                  <span className="text-sm font-medium">{option.label}</span>
+                  <span className="text-xs text-[rgb(var(--muted-foreground))]">{option.desc}</span>
                 </button>
               )
             })}

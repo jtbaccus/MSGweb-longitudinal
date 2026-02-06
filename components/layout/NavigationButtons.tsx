@@ -20,7 +20,7 @@ export function NavigationButtons() {
     'export',
   ]
 
-  const currentIndex = tabs.indexOf(currentTab)
+  const currentIndex = tabs.indexOf(currentTab as NavigationTab)
 
   if (currentIndex === -1) return null
 
