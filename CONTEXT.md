@@ -14,8 +14,9 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 
 ## Current Status
 
-- **Phase:** Pre-implementation (Phase 1: Authentication not yet started)
+- **Phase:** Phase 1 complete — Authentication live, ready for Phase 2 (Database Schema)
 - **Upgrade plan:** See `UPGRADE-PATH.md` for the full 8-phase plan
+- **Phase 2 plan:** See `.claude/plans/rosy-herding-raven.md` for implementation details
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
 
@@ -40,3 +41,16 @@ When the longitudinal features are stable and tested:
 - Fork approach chosen to protect live production deployment
 - Full commit history preserved from original repo
 - Each phase is independently deployable (can pause after any phase)
+- PerformanceLevel: Prisma enum uses uppercase (FAIL/PASS/HONORS); existing TS types use lowercase — mapping in Phase 3
+
+## Phase 1 Summary (Authentication)
+
+Implemented 2026-02-06:
+- NextAuth.js v4 with credentials provider, JWT sessions
+- Prisma + PostgreSQL via `@prisma/adapter-pg`
+- User model: email/password, `UserRole` enum (ADMIN/USER), `mustChangePassword` flag
+- `proxy.ts` middleware: protects all routes, forces password change when flagged
+- Change-password flow: API endpoint + UI page
+- Seeded admin account (`admin@example.com` / `changeme`, forced to change on first login)
+- `lib/api-auth.ts`: `requireAuth()` helper for API routes
+- All 164 existing tests pass

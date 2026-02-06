@@ -22,6 +22,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Force password change if required
+  if (
+    token.mustChangePassword &&
+    pathname !== '/change-password' &&
+    !pathname.startsWith('/api/')
+  ) {
+    return NextResponse.redirect(new URL('/change-password', request.url));
+  }
+
   return NextResponse.next();
 }
 
