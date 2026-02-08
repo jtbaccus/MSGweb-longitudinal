@@ -53,6 +53,7 @@ interface LongitudinalState {
   saveEvaluation: (evaluation: Partial<SavedEvaluation>) => Promise<SavedEvaluation>
   submitEvaluation: (evaluationId: string) => Promise<void>
   generateSummary: (enrollmentId: string, type: SummaryType) => Promise<ProgressSummary>
+  updateSummary: (summaryId: string, data: Partial<Pick<ProgressSummary, 'strengthsSummary' | 'growthAreasSummary' | 'progressNarrative' | 'editedNarrative' | 'recommendations'>>) => Promise<ProgressSummary>
   clearError: () => void
 
   // Computed
@@ -216,6 +217,25 @@ export const useLongitudinalStore = create<LongitudinalState>()(
         const summary: ProgressSummary = await response.json()
         set((state) => ({ summaries: [...state.summaries, summary] }))
         return summary
+      },
+
+      updateSummary: async (summaryId, data) => {
+        const response = await fetch(`/api/summaries/${summaryId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Failed to update summary')
+        }
+        const updated: ProgressSummary = await response.json()
+        set((state) => ({
+          summaries: state.summaries.map((s) =>
+            s.id === summaryId ? updated : s
+          ),
+        }))
+        return updated
       },
 
       getProgressView: () => {

@@ -231,22 +231,22 @@ export function StudentProgressView() {
             <p className="text-sm text-[rgb(var(--muted-foreground))]">No summaries generated yet.</p>
           )}
           <div className="flex gap-3 mt-4">
-            <div className="relative group">
-              <Button variant="outline" size="sm" disabled>
-                Generate Mid-Course
-              </Button>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[rgb(var(--foreground))] text-[rgb(var(--background))] text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                Coming in Phase 7
-              </div>
-            </div>
-            <div className="relative group">
-              <Button variant="outline" size="sm" disabled>
-                Generate End-Course
-              </Button>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[rgb(var(--foreground))] text-[rgb(var(--background))] text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                Coming in Phase 7
-              </div>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={evaluations.filter(e => e.isComplete).length === 0}
+              onClick={() => setCurrentTab('mid-course')}
+            >
+              Generate Mid-Course
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={evaluations.filter(e => e.isComplete).length === 0}
+              onClick={() => setCurrentTab('end-course')}
+            >
+              Generate End-Course
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -126,11 +126,23 @@ export const csvImportSchema = z.object({
 });
 
 // ============================================
-// Generate Summary Schema (Phase 7 stub)
+// Generate Summary Schema
 // ============================================
 
 export const generateSummarySchema = z.object({
   enrollmentId: z.string().min(1, 'Enrollment ID is required'),
   type: z.enum(['MID_COURSE', 'END_OF_COURSE', 'PROGRESS']),
-  authorName: z.string().min(1, 'Author name is required'),
+  authorName: z.string().optional(),
+});
+
+// ============================================
+// Update Summary Schema
+// ============================================
+
+export const updateSummarySchema = z.object({
+  strengthsSummary: z.string().optional().nullable(),
+  growthAreasSummary: z.string().optional().nullable(),
+  progressNarrative: z.string().optional().nullable(),
+  editedNarrative: z.string().optional().nullable(),
+  recommendations: z.string().optional().nullable(),
 });
