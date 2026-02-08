@@ -14,7 +14,7 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 
 ## Current Status
 
-- **Phase:** Phase 6 complete — UI Components implemented, ready for Phase 7 (AI Summary Generation)
+- **Phase:** All 8 phases complete — longitudinal upgrade fully implemented and tested
 - **Upgrade plan:** See `UPGRADE-PATH.md` for the full 8-phase plan
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
@@ -25,8 +25,8 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 4. ~~API Routes~~ — Done
 5. ~~State Management~~ — Done
 6. ~~UI Components~~ — Done
-7. AI Summary Generation
-8. Verification & Testing
+7. ~~AI Summary Generation~~ — Done
+8. ~~Verification & Testing~~ — Done
 
 ## Merge-Back Strategy
 
@@ -142,3 +142,49 @@ Implemented 2026-02-06:
 - Created `components/longitudinal/EndCourseSummaryView.tsx` — stub placeholder for Phase 7
 - No new npm dependencies added
 - Build clean, all 164 tests pass unchanged
+
+## Phase 7 Summary (AI Summary Generation)
+
+Implemented 2026-02-07:
+- Replaced 501 stub in `app/api/generate-summary/route.ts` with full implementation:
+  - Fetches enrollment + student + rotation + clerkship + completed evaluations from DB
+  - Resolves `selectedCriteriaIds` to human-readable names via `defaultTemplates`
+  - Builds system/user prompts calibrated for mid-course vs end-of-course summary types
+  - Calls OpenRouter (`openai/gpt-oss-120b:nitro`) non-streaming, requesting structured JSON output
+  - Parses response into `strengthsSummary`, `growthAreasSummary`, `progressNarrative`, `recommendations`
+  - Calculates `overallPerformance` as mode (most common) of evaluation performance levels
+  - Saves `ProgressSummary` record to DB with `authorId` from session
+  - Mid-course filters evaluations up to midpoint period; end-of-course uses all evaluations
+- Created `app/api/summaries/[id]/route.ts` — GET (fetch single summary) and PUT (update edited fields), both protected with `requireAuth()`
+- Added `updateSummarySchema` to `lib/validations/schemas.ts` — validates optional nullable fields for strengths, growth areas, narrative, edited narrative, recommendations
+- Relaxed `authorName` in `generateSummarySchema` to optional (falls back to session user name)
+- Added `updateSummary` action to `lib/stores/longitudinalStore.ts` — PUTs edited summary content back to `/api/summaries/[id]`, updates local summaries array
+- Replaced placeholder in `components/longitudinal/MidCourseSummaryView.tsx` with full UI:
+  - Shows completed evaluations list with performance badges
+  - "Generate Mid-Course Summary" button with loading state
+  - Editable sections: Strengths Summary, Growth Areas, Progress Narrative
+  - "Save Edits" button persists changes, "Regenerate" button creates new summary
+  - Guards: requires at least 1 completed evaluation
+- Replaced placeholder in `components/longitudinal/EndCourseSummaryView.tsx` with full UI:
+  - Same as Mid-Course plus additional "Recommendations" section
+  - Uses all completed evaluations (not filtered to midpoint)
+- Updated `components/longitudinal/StudentProgressView.tsx`:
+  - Removed "Coming in Phase 7" disabled buttons with tooltips
+  - Enabled "Generate Mid-Course" and "Generate End-Course" buttons
+  - Buttons navigate to `mid-course` / `end-course` tabs respectively
+  - Conditionally disabled when no completed evaluations exist
+- No new npm dependencies added
+- Build clean, all 164 tests pass unchanged
+
+## Phase 8 Summary (Verification & Testing)
+
+Implemented 2026-02-07:
+- Created 5 new test files with 142 tests covering all Phase 4-7 business logic:
+  - `__tests__/progress.test.ts` (34 tests) — `getPeriodDays`, `calculateTotalPeriods`, `calculateCurrentPeriod`, `calculateTrend`, `calculatePeriodStatuses`
+  - `__tests__/csv.test.ts` (16 tests) — `parseCSV` happy path, errors, whitespace, partial rows, case-insensitive headers
+  - `__tests__/schemas.test.ts` (41 tests) — All Zod schemas including refinement rules (LONGITUDINAL requires frequency, midpointWeek < durationWeeks, endDate > startDate)
+  - `__tests__/apiHelpers.test.ts` (13 tests) — `apiError`, `validationError`, `handlePrismaError` (P2002→409, P2025→404, P2003→400, unknown→500)
+  - `__tests__/longitudinalStore.test.ts` (38 tests) — Zustand store: initial state, setters, all async fetch actions (mocked), computed getters
+- Total: 306 tests across 11 test files (142 new + 164 existing), all passing
+- Build clean, no TypeScript errors in tests
+- No source files modified — test-only additions
