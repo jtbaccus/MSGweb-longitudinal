@@ -1,5 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+
+/** Parse pagination params from request URL. */
+export function parsePagination(request: NextRequest) {
+  const page = Math.max(1, Number(request.nextUrl.searchParams.get('page')) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(request.nextUrl.searchParams.get('pageSize')) || 25));
+  return { skip: (page - 1) * pageSize, take: pageSize, page, pageSize };
+}
 
 /** Return a consistent JSON error response. */
 export function apiError(

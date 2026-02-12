@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireAuth } from '@/lib/api-auth';
-import { apiError, validationError, handlePrismaError } from '@/lib/api-helpers';
+import { apiError, validationError, handlePrismaError, parsePagination } from '@/lib/api-helpers';
 import { createStudentSchema } from '@/lib/validations/schemas';
 
 export async function GET(request: NextRequest) {
@@ -10,17 +10,32 @@ export async function GET(request: NextRequest) {
 
   try {
     const search = request.nextUrl.searchParams.get('search');
+    const paginate = request.nextUrl.searchParams.has('page');
+
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { email: { contains: search, mode: 'insensitive' as const } },
+            { medicalSchoolId: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : undefined;
+
+    if (paginate) {
+      const { skip, take, page, pageSize } = parsePagination(request);
+      const [students, total] = await Promise.all([
+        prisma.student.findMany({ where, orderBy: { name: 'asc' }, skip, take }),
+        prisma.student.count({ where }),
+      ]);
+      return NextResponse.json({
+        data: students,
+        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+      });
+    }
 
     const students = await prisma.student.findMany({
-      where: search
-        ? {
-            OR: [
-              { name: { contains: search, mode: 'insensitive' } },
-              { email: { contains: search, mode: 'insensitive' } },
-              { medicalSchoolId: { contains: search, mode: 'insensitive' } },
-            ],
-          }
-        : undefined,
+      where,
       orderBy: { name: 'asc' },
     });
 

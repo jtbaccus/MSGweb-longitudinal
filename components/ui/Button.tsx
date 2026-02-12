@@ -39,6 +39,7 @@ export function Button({
     <button
       className={clsx(baseStyles, variantStyles[variant], sizeStyles[size], className)}
       disabled={disabled || isLoading}
+      aria-busy={isLoading || undefined}
       {...props}
     >
       {isLoading && (

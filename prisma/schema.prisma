@@ -58,6 +58,7 @@ model User {
   sessions      Session[]
   evaluations   Evaluation[]
   summaries     ProgressSummary[]
+  auditLogs     AuditLog[]
 }
 
 model Account {
@@ -93,6 +94,25 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// ============================================
+// Audit Log
+// ============================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // CREATE, UPDATE, DELETE, IMPORT
+  entity    String   // clerkship, rotation, user, etc.
+  entityId  String
+  details   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
 }
 
 // ============================================

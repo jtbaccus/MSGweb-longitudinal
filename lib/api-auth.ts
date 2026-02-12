@@ -22,3 +22,25 @@ export async function requireAuth(): Promise<AuthResult> {
 
   return { session };
 }
+
+/**
+ * Require admin role for an API route.
+ * Returns 401 if not authenticated, 403 if not an admin.
+ */
+export async function requireAdmin(): Promise<AuthResult> {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return {
+      error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+    };
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return {
+      error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+    };
+  }
+
+  return { session };
+}

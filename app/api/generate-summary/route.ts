@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import prisma from '@/lib/prisma';
 import { requireAuth } from '@/lib/api-auth';
+import { checkRateLimit, rateLimits } from '@/lib/rate-limit';
 import { apiError, validationError, handlePrismaError } from '@/lib/api-helpers';
 import { generateSummarySchema } from '@/lib/validations/schemas';
 import { defaultTemplates } from '@/lib/data/templates';
@@ -112,6 +113,14 @@ function buildSummaryUserPrompt(data: {
 export async function POST(request: NextRequest) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
+
+  const rl = checkRateLimit(`summary:${auth.session.user.id}`, rateLimits.generateSummary);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } }
+    );
+  }
 
   const body = await request.json();
   const result = generateSummarySchema.safeParse(body);

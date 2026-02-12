@@ -126,6 +126,26 @@ export const csvImportSchema = z.object({
 });
 
 // ============================================
+// User Schemas
+// ============================================
+
+export const createUserSchema = z.object({
+  email: z.string().email('Valid email is required'),
+  name: z.string().min(1, 'Name is required').optional().nullable(),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  role: z.enum(['ADMIN', 'USER']).optional(),
+  mustChangePassword: z.boolean().optional(),
+});
+
+export const updateUserSchema = z.object({
+  email: z.string().email().optional(),
+  name: z.string().min(1).optional().nullable(),
+  password: z.string().min(8, 'Password must be at least 8 characters').optional(),
+  role: z.enum(['ADMIN', 'USER']).optional(),
+  mustChangePassword: z.boolean().optional(),
+});
+
+// ============================================
 // Generate Summary Schema
 // ============================================
 

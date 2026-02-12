@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { requireAuth } from '@/lib/api-auth';
+import { requireAdmin } from '@/lib/api-auth';
 import { validationError, handlePrismaError } from '@/lib/api-helpers';
 import { csvImportSchema } from '@/lib/validations/schemas';
 import { parseCSV } from '@/lib/utils/csv';
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireAdmin();
   if (auth.error) return auth.error;
 
   try {

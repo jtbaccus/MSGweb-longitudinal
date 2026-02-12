@@ -11,7 +11,7 @@ import { useNavigationStore } from '@/lib/stores/navigationStore'
 import { WordCountPreset } from '@/lib/types'
 import { Sun, Moon, Monitor, Trash2, CheckCircle, XCircle, Ruler, ClipboardList, TrendingUp } from 'lucide-react'
 import { clsx } from 'clsx'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 
 type ThemeOption = 'light' | 'dark' | 'system'
 
@@ -30,12 +30,11 @@ export function SettingsView() {
   const setMode = useLongitudinalStore(state => state.setMode)
   const setCurrentTab = useNavigationStore(state => state.setCurrentTab)
   const activePreset = WORD_COUNT_PRESETS.find(p => p.preset === wordCountPreset)!
-  const [mounted, setMounted] = useState(false)
+  const emptySubscribe = () => () => {}
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false)
   const [apiStatus, setApiStatus] = useState<'checking' | 'ok' | 'error'>('checking')
 
   useEffect(() => {
-    setMounted(true)
-    // Check API status
     fetch('/api/generate-narrative', { method: 'OPTIONS' })
       .then(() => setApiStatus('ok'))
       .catch(() => setApiStatus('error'))

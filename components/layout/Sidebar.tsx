@@ -16,6 +16,8 @@ import {
   TrendingUp,
   BookOpen,
   GraduationCap,
+  Shield,
+  Calendar,
   type LucideIcon,
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
@@ -50,6 +52,13 @@ const longitudinalNavItems: NavItem[] = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
+const adminNavItems: NavItem[] = [
+  { id: 'admin-clerkships', label: 'Clerkships', icon: BookOpen },
+  { id: 'admin-rotations', label: 'Rotations', icon: Calendar },
+  { id: 'admin-enrollments', label: 'Enrollments', icon: Users },
+  { id: 'admin-users', label: 'Users', icon: Shield },
+]
+
 // Tabs that require a student enrollment to be loaded
 const enrollmentRequiredTabs = new Set<LongitudinalNavigationTab>([
   'progress', 'mid-course', 'end-course',
@@ -75,7 +84,7 @@ export function Sidebar() {
         </p>
       </div>
 
-      <nav className="flex-1 p-2 space-y-1">
+      <nav aria-label="Main navigation" className="flex-1 p-2 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = currentTab === item.id
@@ -96,6 +105,7 @@ export function Sidebar() {
               <button
                 onClick={() => !isDisabled && setCurrentTab(item.id)}
                 disabled={isDisabled}
+                aria-current={isActive ? 'page' : undefined}
                 className={clsx(
                   'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left',
                   isActive
@@ -117,6 +127,39 @@ export function Sidebar() {
           )
         })}
       </nav>
+
+      {/* Admin navigation */}
+      {session?.user?.role === 'ADMIN' && (
+        <div className="px-2 pb-2">
+          <div className="border-t border-[rgb(var(--sidebar-border))] pt-2 mt-1">
+            <p className="px-3 py-1 text-xs font-semibold text-[rgb(var(--muted-foreground))] uppercase tracking-wider">
+              Administration
+            </p>
+            <div className="space-y-1 mt-1">
+              {adminNavItems.map((item) => {
+                const Icon = item.icon
+                const isActive = currentTab === item.id
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setCurrentTab(item.id)}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={clsx(
+                      'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left',
+                      isActive
+                        ? 'bg-medical-primary/10 text-medical-primary'
+                        : 'text-[rgb(var(--foreground))] hover:bg-[rgb(var(--card-background))]'
+                    )}
+                  >
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    <span>{item.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Context footer: template name or student name */}
       {isLongitudinal && currentStudent && (

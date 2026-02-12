@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { requireAuth } from '@/lib/api-auth';
+import { requireAuth, requireAdmin } from '@/lib/api-auth';
 import { validationError, handlePrismaError } from '@/lib/api-helpers';
 import { createRotationSchema } from '@/lib/validations/schemas';
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth();
+  const auth = await requireAdmin();
   if (auth.error) return auth.error;
 
   try {

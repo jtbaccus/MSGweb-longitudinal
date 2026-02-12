@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { requireAuth } from '@/lib/api-auth';
+import { requireAuth, requireAdmin } from '@/lib/api-auth';
 import { apiError, validationError, handlePrismaError } from '@/lib/api-helpers';
 import { updateEnrollmentSchema } from '@/lib/validations/schemas';
 
@@ -34,7 +34,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAuth();
+  const auth = await requireAdmin();
   if (auth.error) return auth.error;
 
   try {
@@ -62,7 +62,7 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAuth();
+  const auth = await requireAdmin();
   if (auth.error) return auth.error;
 
   try {

@@ -143,3 +143,7 @@ export type LongitudinalNavigationTab =
   | 'progress'
   | 'mid-course'
   | 'end-course'
+  | 'admin-clerkships'
+  | 'admin-rotations'
+  | 'admin-enrollments'
+  | 'admin-users'

@@ -1,6 +1,7 @@
 'use client'
 
 import { useNavigationStore } from '@/lib/stores/navigationStore'
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
 import { TemplateSelectionView } from '@/components/templates/TemplateSelectionView'
 import { EvaluationFormView } from '@/components/evaluation/EvaluationFormView'
 import { PersonalAttributeView } from '@/components/attributes/PersonalAttributeView'
@@ -15,12 +16,18 @@ import { StudentListView } from '@/components/longitudinal/StudentListView'
 import { StudentProgressView } from '@/components/longitudinal/StudentProgressView'
 import { MidCourseSummaryView } from '@/components/longitudinal/MidCourseSummaryView'
 import { EndCourseSummaryView } from '@/components/longitudinal/EndCourseSummaryView'
+import { ClerkshipManagementView } from '@/components/admin/ClerkshipManagementView'
+import { RotationManagementView } from '@/components/admin/RotationManagementView'
+import { EnrollmentManagementView } from '@/components/admin/EnrollmentManagementView'
+import { UserManagementView } from '@/components/admin/UserManagementView'
 
 export function MainContent() {
   const currentTab = useNavigationStore(state => state.currentTab)
 
   return (
     <main className="flex-1 overflow-auto p-6">
+      <Breadcrumbs />
+
       {currentTab === 'templates' && <TemplateSelectionView />}
       {currentTab === 'evaluation' && <EvaluationFormView />}
       {currentTab === 'attributes' && <PersonalAttributeView />}
@@ -35,6 +42,12 @@ export function MainContent() {
       {currentTab === 'progress' && <StudentProgressView />}
       {currentTab === 'mid-course' && <MidCourseSummaryView />}
       {currentTab === 'end-course' && <EndCourseSummaryView />}
+
+      {/* Admin management views */}
+      {currentTab === 'admin-clerkships' && <ClerkshipManagementView />}
+      {currentTab === 'admin-rotations' && <RotationManagementView />}
+      {currentTab === 'admin-enrollments' && <EnrollmentManagementView />}
+      {currentTab === 'admin-users' && <UserManagementView />}
 
       <NavigationButtons />
     </main>

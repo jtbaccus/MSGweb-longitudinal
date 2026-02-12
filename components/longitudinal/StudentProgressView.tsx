@@ -1,6 +1,7 @@
 'use client'
 
 import { ContentHeader } from '@/components/layout/ContentHeader'
+import { ExportPanel } from '@/components/longitudinal/ExportPanel'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Badge, PerformanceBadge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -74,6 +75,11 @@ export function StudentProgressView() {
           </Button>
         }
       />
+
+      {/* Export */}
+      <div className="mb-4">
+        <ExportPanel enrollmentId={enrollment.id} />
+      </div>
 
       {/* Info Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
