@@ -6,11 +6,14 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { TextArea } from '@/components/ui/TextArea'
 import { Badge } from '@/components/ui/Badge'
+import { useSession } from 'next-auth/react'
 import { useEvaluationStore } from '@/lib/stores/evaluationStore'
+import { useLongitudinalStore } from '@/lib/stores/longitudinalStore'
+import { useNavigationStore } from '@/lib/stores/navigationStore'
 import { useSettingsStore, WORD_COUNT_PRESETS } from '@/lib/stores/settingsStore'
 import { validateEvaluation } from '@/lib/utils/validation'
 import { getPerformanceLevelLabel } from '@/lib/utils/performanceLevel'
-import { Sparkles, Copy, RotateCcw, ExternalLink, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Sparkles, Copy, RotateCcw, ExternalLink, CheckCircle, AlertTriangle, Save } from 'lucide-react'
 
 export function AIGenerationView() {
   const {
@@ -21,6 +24,7 @@ export function AIGenerationView() {
     isGenerating,
     generationError,
     currentTemplate,
+    enrollmentId,
     setGeneratedNarrative,
     setEditedGeneratedNarrative,
     resetEditedNarrative,
@@ -29,9 +33,15 @@ export function AIGenerationView() {
     getStrengths,
     getSelectedAttributes,
     getPerformanceLevel,
+    saveToDatabase,
   } = useEvaluationStore()
 
+  const { isInEvaluationFlow, setIsInEvaluationFlow, loadStudentProgress, currentEnrollment } = useLongitudinalStore()
+  const setCurrentTab = useNavigationStore(state => state.setCurrentTab)
+  const { data: session } = useSession()
+
   const [copied, setCopied] = useState(false)
+  const [isSavingToRecord, setIsSavingToRecord] = useState(false)
 
   const wordCountRange = useSettingsStore(state => state.getWordCountRange)()
   const wordCountPreset = useSettingsStore(state => state.wordCountPreset)
@@ -139,6 +149,23 @@ export function AIGenerationView() {
 
   const handleClear = () => {
     setEditedGeneratedNarrative('')
+  }
+
+  const handleSaveAndReturn = async () => {
+    if (!enrollmentId) return
+    setIsSavingToRecord(true)
+    try {
+      await saveToDatabase({ evaluatorName: session?.user?.name || '' })
+      if (currentEnrollment) {
+        await loadStudentProgress(currentEnrollment.id)
+      }
+      setIsInEvaluationFlow(false)
+      setCurrentTab('progress')
+    } catch (err) {
+      setGenerationError((err as Error).message)
+    } finally {
+      setIsSavingToRecord(false)
+    }
   }
 
   if (!currentTemplate) {
@@ -289,18 +316,36 @@ export function AIGenerationView() {
         </Card>
       )}
 
+      {/* Save & Return (longitudinal flow) */}
+      {enrollmentId && isInEvaluationFlow && editedGeneratedNarrative && !isGenerating && (
+        <div className="mt-6">
+          <Button
+            onClick={handleSaveAndReturn}
+            size="lg"
+            className="w-full"
+            isLoading={isSavingToRecord}
+            disabled={isSavingToRecord}
+          >
+            <Save className="w-5 h-5 mr-2" />
+            Save & Return to Progress
+          </Button>
+        </div>
+      )}
+
       {/* MedHub Link */}
-      <div className="mt-6 text-center">
-        <a
-          href="https://uab.medhub.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm text-medical-primary hover:underline"
-        >
-          <ExternalLink className="w-4 h-4" />
-          Open MedHub to submit evaluation
-        </a>
-      </div>
+      {!isInEvaluationFlow && (
+        <div className="mt-6 text-center">
+          <a
+            href="https://uab.medhub.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-medical-primary hover:underline"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Open MedHub to submit evaluation
+          </a>
+        </div>
+      )}
     </div>
   )
 }

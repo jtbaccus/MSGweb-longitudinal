@@ -22,6 +22,7 @@ interface EvaluationState {
   // Longitudinal context (optional — set when editing within a longitudinal enrollment)
   enrollmentId?: string
   periodNumber?: number
+  lastSavedEvaluationId?: string
 
   // Actions
   loadTemplate: (template: ClerkshipTemplate) => void
@@ -41,7 +42,7 @@ interface EvaluationState {
   // Longitudinal actions
   setLongitudinalContext: (enrollmentId: string, periodNumber: number) => void
   clearLongitudinalContext: () => void
-  saveToDatabase: () => Promise<void>
+  saveToDatabase: (options?: { evaluatorName?: string; submit?: boolean }) => Promise<string>
   loadFromDatabase: (evaluationId: string) => Promise<void>
 
   // Selectors (computed)
@@ -64,6 +65,7 @@ export const useEvaluationStore = create<EvaluationState>()(
       generationError: null,
       enrollmentId: undefined,
       periodNumber: undefined,
+      lastSavedEvaluationId: undefined,
 
       loadTemplate: (template) => {
         const itemsWithSelection = template.items.map(item => ({
@@ -132,6 +134,7 @@ export const useEvaluationStore = create<EvaluationState>()(
           generationError: null,
           enrollmentId: undefined,
           periodNumber: undefined,
+          lastSavedEvaluationId: undefined,
         }))
       },
 
@@ -147,6 +150,7 @@ export const useEvaluationStore = create<EvaluationState>()(
           generationError: null,
           enrollmentId: undefined,
           periodNumber: undefined,
+          lastSavedEvaluationId: undefined,
         })
       },
 
@@ -156,7 +160,7 @@ export const useEvaluationStore = create<EvaluationState>()(
       clearLongitudinalContext: () =>
         set({ enrollmentId: undefined, periodNumber: undefined }),
 
-      saveToDatabase: async () => {
+      saveToDatabase: async (options) => {
         const state = get()
         if (!state.enrollmentId || !state.currentTemplate) {
           throw new Error('Missing enrollment context or template')
@@ -171,7 +175,7 @@ export const useEvaluationStore = create<EvaluationState>()(
           .map((attr) => attr.id)
 
         const body = {
-          evaluatorName: '',
+          evaluatorName: options?.evaluatorName ?? '',
           periodNumber: state.periodNumber,
           evaluationDate: new Date().toISOString(),
           performanceLevel,
@@ -181,7 +185,7 @@ export const useEvaluationStore = create<EvaluationState>()(
           generatedNarrative: state.generatedNarrative || null,
           editedNarrative: state.editedGeneratedNarrative || null,
           templateId: state.currentTemplate.id,
-          isDraft: true,
+          isDraft: !options?.submit,
         }
 
         const response = await fetch(
@@ -196,6 +200,9 @@ export const useEvaluationStore = create<EvaluationState>()(
           const data = await response.json()
           throw new Error(data.error || 'Failed to save evaluation')
         }
+        const saved = await response.json()
+        set({ lastSavedEvaluationId: saved.id })
+        return saved.id
       },
 
       loadFromDatabase: async (evaluationId) => {

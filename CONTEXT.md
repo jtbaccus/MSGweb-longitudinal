@@ -14,8 +14,8 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 
 ## Current Status
 
-- **Phase:** All 8 phases + pre-launch improvements complete
-- **Upgrade plan:** See `UPGRADE-PATH.md` for the full 8-phase plan
+- **Phase:** All 9 phases + pre-launch improvements complete
+- **Upgrade plan:** See `UPGRADE-PATH.md` for the full 9-phase plan
 - **Pre-launch:** Security (RBAC, rate limiting, audit logging), admin UI, export/reporting, UX polish, E2E tests all implemented
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
@@ -28,6 +28,7 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 6. ~~UI Components~~ — Done
 7. ~~AI Summary Generation~~ — Done
 8. ~~Verification & Testing~~ — Done
+9. ~~Single ↔ Longitudinal Integration~~ — Done
 
 ## Merge-Back Strategy
 
@@ -189,6 +190,47 @@ Implemented 2026-02-07:
 - Total: 306 tests across 11 test files (142 new + 164 existing), all passing
 - Build clean, no TypeScript errors in tests
 - No source files modified — test-only additions
+
+## Phase 9 Summary (Single ↔ Longitudinal Integration)
+
+Implemented 2026-02-09:
+
+The single evaluation workflow and longitudinal tracking system were completely siloed. This phase bridges them so evaluations flow naturally into longitudinal records, and the longitudinal system is fully usable without raw API calls.
+
+### Bug Fix
+- Fixed `app/api/students/route.ts` GET handler — was not including enrollments. Added `include: { enrollments: { include: { rotation: { include: { clerkship: true } } } } }` so `StudentListView` enrollment display works.
+
+### P1: Manual Student Creation
+- **New:** `components/longitudinal/AddStudentModal.tsx` — modal form (name, email, medicalSchoolId), POSTs to existing `/api/students`
+- **Modified:** `components/longitudinal/StudentListView.tsx` — added "Add Student" button (UserPlus icon) next to "Import CSV", updated empty state text
+
+### P2: Clerkship / Rotation / Enrollment Setup UI
+- **New:** `components/longitudinal/SetupClerkshipModal.tsx` — template dropdown auto-fills name/templateId, type select, duration, midpoint week, eval frequency (required for LONGITUDINAL type)
+- **New:** `components/longitudinal/SetupRotationModal.tsx` — clerkship dropdown, start/end dates, academic year
+- **New:** `components/longitudinal/EnrollStudentModal.tsx` — student search/select, rotation select (shows "Clerkship - AY - dates"), start date defaults to rotation start
+- **Modified:** `components/longitudinal/DashboardView.tsx` — "Quick Setup" card with 3 action buttons (New Clerkship, New Rotation, Enroll Student), buttons disable when prerequisites missing, updated empty state text
+- **Modified:** `components/longitudinal/StudentListView.tsx` — "Enroll in Rotation" button in each student's expanded section
+- **Modified:** `lib/stores/longitudinalStore.ts` — added `createStudent()`, `createClerkship()`, `createRotation()`, `createEnrollment()` store actions (thin wrappers that POST to existing API endpoints and update local arrays), added `isInEvaluationFlow` state + setter
+
+### P3: Bridge Single → Longitudinal (Export Tab)
+- **New:** `components/longitudinal/SaveToRecordModal.tsx` — 3-step wizard: (1) search/create student, (2) select enrollment with template-match highlighting, (3) confirm with period number and Save as Draft / Save & Submit
+- **Modified:** `lib/stores/evaluationStore.ts` — `saveToDatabase()` now accepts optional `{ evaluatorName, submit }` options and returns created evaluation ID; added `lastSavedEvaluationId` state field
+- **Modified:** `components/export/ExportReportView.tsx` — added "Save to Student Record" button below Export PDF button, opens `SaveToRecordModal`
+
+### P4: Longitudinal Evaluation Using Single Eval Form
+- **Modified:** `components/longitudinal/StudentProgressView.tsx` — "New Evaluation" button in Evaluations card header; finds matching template, loads into evaluationStore, sets longitudinal context, enters evaluation flow
+- **Modified:** `lib/stores/longitudinalStore.ts` — added `isInEvaluationFlow: boolean` state + `setIsInEvaluationFlow` setter
+- **Modified:** `components/layout/Sidebar.tsx` — when `mode === 'longitudinal' && isInEvaluationFlow`: shows hybrid nav with "Back to Progress" button + evaluation/attributes/narrative/summary/generate tabs (skips templates/export/settings)
+- **Modified:** `components/generate/AIGenerationView.tsx` — when `enrollmentId` is set and in evaluation flow: shows "Save & Return to Progress" button after narrative generation; saves to DB, reloads progress data, navigates back
+
+### P5: Evaluation Detail Modal
+- **New:** `components/longitudinal/EvaluationDetailModal.tsx` — fetches `GET /api/evaluations/{id}` on open; displays read-only view of header info, selected criteria (resolved from `defaultTemplates`), selected attributes (resolved from `defaultPersonalAttributes`), narrative context, generated narrative, edited narrative; "Edit" button for drafts enters P4 evaluation flow
+- **Modified:** `components/longitudinal/StudentProgressView.tsx` — wired the existing "View" button (previously a no-op) to open `EvaluationDetailModal`
+
+### Files Changed
+- **New files (6):** AddStudentModal, SetupClerkshipModal, SetupRotationModal, EnrollStudentModal, SaveToRecordModal, EvaluationDetailModal
+- **Modified files (8):** `app/api/students/route.ts`, `StudentListView`, `DashboardView`, `longitudinalStore`, `evaluationStore`, `ExportReportView`, `Sidebar`, `AIGenerationView`, `StudentProgressView`
+- Build clean, all 306 tests pass
 
 ## Pre-Launch Improvements (2026-02-11)
 

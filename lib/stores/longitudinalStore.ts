@@ -41,6 +41,7 @@ interface LongitudinalState {
   // UI state
   isLoading: boolean
   error: string | null
+  isInEvaluationFlow: boolean
 
   // Actions
   setMode: (mode: 'single' | 'longitudinal') => void
@@ -55,6 +56,11 @@ interface LongitudinalState {
   generateSummary: (enrollmentId: string, type: SummaryType) => Promise<ProgressSummary>
   updateSummary: (summaryId: string, data: Partial<Pick<ProgressSummary, 'strengthsSummary' | 'growthAreasSummary' | 'progressNarrative' | 'editedNarrative' | 'recommendations'>>) => Promise<ProgressSummary>
   clearError: () => void
+  setIsInEvaluationFlow: (value: boolean) => void
+  createStudent: (data: { name: string; email?: string | null; medicalSchoolId?: string | null }) => Promise<Student>
+  createClerkship: (data: { name: string; templateId: string; type: string; durationWeeks: number; midpointWeek?: number | null; evaluationFrequency?: string | null }) => Promise<Clerkship>
+  createRotation: (data: { clerkshipId: string; startDate: string; endDate: string; academicYear: string }) => Promise<Rotation>
+  createEnrollment: (data: { studentId: string; rotationId: string; startDate: string }) => Promise<StudentEnrollment>
 
   // Computed
   getProgressView: () => StudentProgressView | null
@@ -77,6 +83,7 @@ export const useLongitudinalStore = create<LongitudinalState>()(
       summaries: [],
       isLoading: false,
       error: null,
+      isInEvaluationFlow: false,
 
       setMode: (mode) => set({ mode }),
 
@@ -85,6 +92,67 @@ export const useLongitudinalStore = create<LongitudinalState>()(
       setCurrentEnrollment: (enrollment) => set({ currentEnrollment: enrollment }),
 
       clearError: () => set({ error: null }),
+
+      setIsInEvaluationFlow: (value) => set({ isInEvaluationFlow: value }),
+
+      createStudent: async (data) => {
+        const response = await fetch('/api/students', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        if (!response.ok) {
+          const res = await response.json()
+          throw new Error(res.error || 'Failed to create student')
+        }
+        const student: Student = await response.json()
+        set((state) => ({ students: [...state.students, student] }))
+        return student
+      },
+
+      createClerkship: async (data) => {
+        const response = await fetch('/api/clerkships', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        if (!response.ok) {
+          const res = await response.json()
+          throw new Error(res.error || 'Failed to create clerkship')
+        }
+        const clerkship: Clerkship = await response.json()
+        set((state) => ({ clerkships: [...state.clerkships, clerkship] }))
+        return clerkship
+      },
+
+      createRotation: async (data) => {
+        const response = await fetch('/api/rotations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        if (!response.ok) {
+          const res = await response.json()
+          throw new Error(res.error || 'Failed to create rotation')
+        }
+        const rotation: Rotation = await response.json()
+        set((state) => ({ rotations: [...state.rotations, rotation] }))
+        return rotation
+      },
+
+      createEnrollment: async (data) => {
+        const response = await fetch('/api/enrollments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        if (!response.ok) {
+          const res = await response.json()
+          throw new Error(res.error || 'Failed to create enrollment')
+        }
+        const enrollment: StudentEnrollment = await response.json()
+        return enrollment
+      },
 
       loadStudents: async (search) => {
         set({ isLoading: true, error: null })

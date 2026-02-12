@@ -1,12 +1,16 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { ContentHeader } from '@/components/layout/ContentHeader'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
 import { useLongitudinalStore } from '@/lib/stores/longitudinalStore'
 import { useNavigationStore } from '@/lib/stores/navigationStore'
-import { Users, RotateCw, ClipboardList, CheckCircle, Calendar, ChevronRight } from 'lucide-react'
+import { SetupClerkshipModal } from '@/components/longitudinal/SetupClerkshipModal'
+import { SetupRotationModal } from '@/components/longitudinal/SetupRotationModal'
+import { EnrollStudentModal } from '@/components/longitudinal/EnrollStudentModal'
+import { Users, RotateCw, ClipboardList, CheckCircle, Calendar, ChevronRight, BookOpen, UserCheck, Plus } from 'lucide-react'
 
 export function DashboardView() {
   const {
@@ -20,6 +24,10 @@ export function DashboardView() {
     loadStudents,
   } = useLongitudinalStore()
   const setCurrentTab = useNavigationStore(state => state.setCurrentTab)
+
+  const [clerkshipModalOpen, setClerkshipModalOpen] = useState(false)
+  const [rotationModalOpen, setRotationModalOpen] = useState(false)
+  const [enrollModalOpen, setEnrollModalOpen] = useState(false)
 
   useEffect(() => {
     loadClerkships()
@@ -104,6 +112,45 @@ export function DashboardView() {
         })}
       </div>
 
+      {/* Quick Setup */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            Quick Setup
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" onClick={() => setClerkshipModalOpen(true)}>
+              <BookOpen className="w-4 h-4 mr-2" />
+              New Clerkship
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setRotationModalOpen(true)}
+              disabled={clerkships.length === 0}
+            >
+              <RotateCw className="w-4 h-4 mr-2" />
+              New Rotation
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setEnrollModalOpen(true)}
+              disabled={rotations.length === 0}
+            >
+              <UserCheck className="w-4 h-4 mr-2" />
+              Enroll Student
+            </Button>
+          </div>
+          {clerkships.length === 0 && (
+            <p className="text-xs text-[rgb(var(--muted-foreground))] mt-2">
+              Start by creating a clerkship, then add rotations and enroll students.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Active Rotations */}
       <h3 className="text-lg font-semibold mb-4">Active Rotations</h3>
       {activeRotations.length === 0 ? (
@@ -113,7 +160,7 @@ export function DashboardView() {
               <Calendar className="w-10 h-10 mx-auto mb-3 text-[rgb(var(--muted-foreground))]" />
               <p className="text-[rgb(var(--muted-foreground))]">No active rotations found.</p>
               <p className="text-sm text-[rgb(var(--muted-foreground))] mt-1">
-                Create clerkships and rotations via the API to get started.
+                Use the Quick Setup buttons above to get started.
               </p>
             </div>
           </CardContent>
@@ -167,6 +214,22 @@ export function DashboardView() {
           })}
         </div>
       )}
+
+      <SetupClerkshipModal
+        open={clerkshipModalOpen}
+        onClose={() => setClerkshipModalOpen(false)}
+        onCreated={() => loadClerkships()}
+      />
+      <SetupRotationModal
+        open={rotationModalOpen}
+        onClose={() => setRotationModalOpen(false)}
+        onCreated={() => loadRotations()}
+      />
+      <EnrollStudentModal
+        open={enrollModalOpen}
+        onClose={() => setEnrollModalOpen(false)}
+        onCreated={() => { loadRotations(); loadStudents() }}
+      />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { ContentHeader } from '@/components/layout/ContentHeader'
 import { ExportPanel } from '@/components/longitudinal/ExportPanel'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
@@ -8,7 +9,10 @@ import { Button } from '@/components/ui/Button'
 import { PeriodTimeline } from '@/components/longitudinal/PeriodTimeline'
 import { PerformanceChart } from '@/components/longitudinal/PerformanceChart'
 import { useLongitudinalStore } from '@/lib/stores/longitudinalStore'
+import { useEvaluationStore } from '@/lib/stores/evaluationStore'
 import { useNavigationStore } from '@/lib/stores/navigationStore'
+import { defaultTemplates } from '@/lib/data/templates'
+import { EvaluationDetailModal } from '@/components/longitudinal/EvaluationDetailModal'
 import {
   ArrowLeft,
   Calendar,
@@ -18,6 +22,7 @@ import {
   HelpCircle,
   ClipboardList,
   FileText,
+  Plus,
 } from 'lucide-react'
 
 const trendConfig = {
@@ -30,7 +35,12 @@ const trendConfig = {
 export function StudentProgressView() {
   const progressView = useLongitudinalStore(state => state.getProgressView())
   const periodStatuses = useLongitudinalStore(state => state.getPeriodStatuses())
+  const setIsInEvaluationFlow = useLongitudinalStore(state => state.setIsInEvaluationFlow)
+  const loadTemplate = useEvaluationStore(state => state.loadTemplate)
+  const setLongitudinalContext = useEvaluationStore(state => state.setLongitudinalContext)
   const setCurrentTab = useNavigationStore(state => state.setCurrentTab)
+
+  const [viewingEvaluationId, setViewingEvaluationId] = useState<string | null>(null)
 
   if (!progressView) {
     return (
@@ -62,6 +72,16 @@ export function StudentProgressView() {
   const { student, enrollment, clerkship, evaluations, summaries, currentPeriod, totalPeriods, progressPercentage, performanceTrend } = progressView
   const trend = trendConfig[performanceTrend]
   const TrendIcon = trend.icon
+
+  const handleNewEvaluation = () => {
+    const template = defaultTemplates.find(t => t.id === clerkship.templateId)
+    if (!template) return
+    loadTemplate(template)
+    const maxPeriod = evaluations.reduce((max, e) => Math.max(max, e.periodNumber), 0)
+    setLongitudinalContext(enrollment.id, maxPeriod + 1)
+    setIsInEvaluationFlow(true)
+    setCurrentTab('evaluation')
+  }
 
   return (
     <div className="max-w-4xl">
@@ -173,6 +193,10 @@ export function StudentProgressView() {
             <ClipboardList className="w-5 h-5" />
             Evaluations
           </CardTitle>
+          <Button variant="outline" size="sm" onClick={handleNewEvaluation}>
+            <Plus className="w-4 h-4 mr-1" />
+            New Evaluation
+          </Button>
         </CardHeader>
         <CardContent>
           {evaluations.length === 0 ? (
@@ -197,7 +221,7 @@ export function StudentProgressView() {
                         {new Date(evaluation.evaluationDate).toLocaleDateString()}
                       </p>
                     </div>
-                    <Button variant="ghost" size="sm">View</Button>
+                    <Button variant="ghost" size="sm" onClick={() => setViewingEvaluationId(evaluation.id)}>View</Button>
                   </div>
                 ))}
             </div>
@@ -256,6 +280,23 @@ export function StudentProgressView() {
           </div>
         </CardContent>
       </Card>
+
+      <EvaluationDetailModal
+        evaluationId={viewingEvaluationId}
+        open={!!viewingEvaluationId}
+        onClose={() => setViewingEvaluationId(null)}
+        onEdit={(evalId) => {
+          setViewingEvaluationId(null)
+          const evalData = evaluations.find(e => e.id === evalId)
+          if (!evalData) return
+          const template = defaultTemplates.find(t => t.id === evalData.templateId)
+          if (!template) return
+          loadTemplate(template)
+          setLongitudinalContext(enrollment.id, evalData.periodNumber)
+          setIsInEvaluationFlow(true)
+          setCurrentTab('evaluation')
+        }}
+      />
     </div>
   )
 }

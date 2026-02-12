@@ -10,7 +10,8 @@ import { Badge, PerformanceBadge } from '@/components/ui/Badge'
 import { useEvaluationStore } from '@/lib/stores/evaluationStore'
 import { validateReportData } from '@/lib/utils/validation'
 import { getPerformanceLevelLabel } from '@/lib/utils/performanceLevel'
-import { Download, FileText, AlertCircle } from 'lucide-react'
+import { SaveToRecordModal } from '@/components/longitudinal/SaveToRecordModal'
+import { Download, FileText, AlertCircle, Save } from 'lucide-react'
 
 export function ExportReportView() {
   const {
@@ -30,6 +31,7 @@ export function ExportReportView() {
   )
   const [isExporting, setIsExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
+  const [saveToRecordOpen, setSaveToRecordOpen] = useState(false)
 
   const [includeStrengths, setIncludeStrengths] = useState(true)
   const [includeAreasForImprovement, setIncludeAreasForImprovement] = useState(true)
@@ -213,6 +215,16 @@ export function ExportReportView() {
             <Download className="w-5 h-5 mr-2" />
             {isExporting ? 'Generating PDF...' : 'Export PDF Report'}
           </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => setSaveToRecordOpen(true)}
+            size="lg"
+            className="w-full"
+          >
+            <Save className="w-5 h-5 mr-2" />
+            Save to Student Record
+          </Button>
         </div>
 
         {/* Preview Section */}
@@ -260,6 +272,13 @@ export function ExportReportView() {
           </CardContent>
         </Card>
       </div>
+
+      <SaveToRecordModal
+        open={saveToRecordOpen}
+        onClose={() => setSaveToRecordOpen(false)}
+        studentName={studentName}
+        evaluatorName={evaluatorName}
+      />
     </div>
   )
 }

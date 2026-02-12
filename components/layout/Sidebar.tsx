@@ -18,6 +18,7 @@ import {
   GraduationCap,
   Shield,
   Calendar,
+  ArrowLeft,
   type LucideIcon,
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
@@ -59,6 +60,15 @@ const adminNavItems: NavItem[] = [
   { id: 'admin-users', label: 'Users', icon: Shield },
 ]
 
+// When in evaluation flow from longitudinal mode, show eval-specific tabs
+const evaluationFlowNavItems: NavItem[] = [
+  { id: 'evaluation', label: 'Evaluation', icon: ClipboardList },
+  { id: 'attributes', label: 'Attributes', icon: User },
+  { id: 'narrative', label: 'Narrative', icon: FileText },
+  { id: 'summary', label: 'Summary', icon: BarChart3 },
+  { id: 'generate', label: 'Generate', icon: Sparkles },
+]
+
 // Tabs that require a student enrollment to be loaded
 const enrollmentRequiredTabs = new Set<LongitudinalNavigationTab>([
   'progress', 'mid-course', 'end-course',
@@ -70,10 +80,18 @@ export function Sidebar() {
   const mode = useLongitudinalStore(state => state.mode)
   const currentStudent = useLongitudinalStore(state => state.currentStudent)
   const currentEnrollment = useLongitudinalStore(state => state.currentEnrollment)
+  const isInEvaluationFlow = useLongitudinalStore(state => state.isInEvaluationFlow)
+  const setIsInEvaluationFlow = useLongitudinalStore(state => state.setIsInEvaluationFlow)
   const { data: session } = useSession()
 
   const isLongitudinal = mode === 'longitudinal'
-  const navItems = isLongitudinal ? longitudinalNavItems : singleNavItems
+  const showEvalFlow = isLongitudinal && isInEvaluationFlow
+  const navItems = showEvalFlow ? evaluationFlowNavItems : (isLongitudinal ? longitudinalNavItems : singleNavItems)
+
+  const handleBackToProgress = () => {
+    setIsInEvaluationFlow(false)
+    setCurrentTab('progress')
+  }
 
   return (
     <aside className="w-56 sidebar-bg border-r border-[rgb(var(--sidebar-border))] flex flex-col h-full">
@@ -85,6 +103,15 @@ export function Sidebar() {
       </div>
 
       <nav aria-label="Main navigation" className="flex-1 p-2 space-y-1">
+        {showEvalFlow && (
+          <button
+            onClick={handleBackToProgress}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left text-medical-primary hover:bg-medical-primary/10 mb-2"
+          >
+            <ArrowLeft className="w-5 h-5 flex-shrink-0" />
+            <span>Back to Progress</span>
+          </button>
+        )}
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = currentTab === item.id

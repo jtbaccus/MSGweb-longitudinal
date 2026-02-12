@@ -1200,5 +1200,40 @@ ${type === 'END_OF_COURSE' ? '5. **Recommendations** (2-3 bullets): Forward-look
 6. **Phase 6**: UI components (user-facing features)
 7. **Phase 7**: AI summaries (capstone feature)
 8. **Phase 8**: Testing and verification
+9. **Phase 9**: Single ↔ Longitudinal integration (bridge between workflows)
 
 Each phase builds on the previous. Can pause after any phase with a working (partial) system.
+
+---
+
+### Phase 9: Single ↔ Longitudinal Integration
+
+**Goal**: Bridge the siloed single evaluation and longitudinal tracking workflows so evaluations flow naturally into longitudinal records and the longitudinal system is usable without raw API calls.
+
+**Status**: Complete (2026-02-09)
+
+#### Bug Fix
+- `app/api/students/route.ts` — GET handler now includes enrollments with rotation and clerkship data
+
+#### New Files (6)
+| File | Purpose |
+|------|---------|
+| `components/longitudinal/AddStudentModal.tsx` | Manual student creation form |
+| `components/longitudinal/SetupClerkshipModal.tsx` | Clerkship setup with template selection |
+| `components/longitudinal/SetupRotationModal.tsx` | Rotation setup with clerkship selection |
+| `components/longitudinal/EnrollStudentModal.tsx` | Student enrollment with search/select |
+| `components/longitudinal/SaveToRecordModal.tsx` | 3-step wizard to save single eval to longitudinal record |
+| `components/longitudinal/EvaluationDetailModal.tsx` | Read-only evaluation detail view with edit support for drafts |
+
+#### Modified Files (9)
+| File | Changes |
+|------|---------|
+| `app/api/students/route.ts` | Include enrollments in GET response |
+| `components/longitudinal/StudentListView.tsx` | Add Student button, Enroll button, EnrollStudentModal integration |
+| `components/longitudinal/DashboardView.tsx` | Quick Setup section, setup modal integration |
+| `lib/stores/longitudinalStore.ts` | `createStudent/Clerkship/Rotation/Enrollment` actions, `isInEvaluationFlow` state |
+| `lib/stores/evaluationStore.ts` | `saveToDatabase` accepts options, returns evaluation ID, `lastSavedEvaluationId` |
+| `components/export/ExportReportView.tsx` | "Save to Student Record" button + SaveToRecordModal |
+| `components/layout/Sidebar.tsx` | Hybrid nav for eval flow, "Back to Progress" button |
+| `components/generate/AIGenerationView.tsx` | "Save & Return to Progress" button in longitudinal flow |
+| `components/longitudinal/StudentProgressView.tsx` | "New Evaluation" button, View button wired, EvaluationDetailModal |

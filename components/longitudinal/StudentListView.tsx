@@ -9,7 +9,9 @@ import { Badge } from '@/components/ui/Badge'
 import { useLongitudinalStore } from '@/lib/stores/longitudinalStore'
 import { useNavigationStore } from '@/lib/stores/navigationStore'
 import { CSVImportModal } from '@/components/longitudinal/CSVImportModal'
-import { Upload, Search, Users, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react'
+import { AddStudentModal } from '@/components/longitudinal/AddStudentModal'
+import { EnrollStudentModal } from '@/components/longitudinal/EnrollStudentModal'
+import { Upload, Search, Users, ChevronDown, ChevronRight, ExternalLink, UserPlus, UserCheck } from 'lucide-react'
 import type { Student } from '@/lib/types'
 
 export function StudentListView() {
@@ -19,6 +21,8 @@ export function StudentListView() {
     error,
     loadStudents,
     loadStudentProgress,
+    loadRotations,
+    loadClerkships,
   } = useLongitudinalStore()
   const setCurrentTab = useNavigationStore(state => state.setCurrentTab)
 
@@ -26,6 +30,9 @@ export function StudentListView() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null)
   const [importOpen, setImportOpen] = useState(false)
+  const [addStudentOpen, setAddStudentOpen] = useState(false)
+  const [enrollOpen, setEnrollOpen] = useState(false)
+  const [enrollStudent, setEnrollStudent] = useState<Student | null>(null)
 
   // Debounce search
   useEffect(() => {
@@ -36,6 +43,12 @@ export function StudentListView() {
   useEffect(() => {
     loadStudents(debouncedSearch || undefined)
   }, [debouncedSearch, loadStudents])
+
+  // Ensure rotations/clerkships are loaded for enrollment modal
+  useEffect(() => {
+    loadClerkships()
+    loadRotations()
+  }, [loadClerkships, loadRotations])
 
   const handleEnrollmentClick = useCallback(async (enrollmentId: string) => {
     await loadStudentProgress(enrollmentId)
@@ -61,10 +74,16 @@ export function StudentListView() {
         title="Students"
         description="Browse and manage student enrollments."
         action={
-          <Button variant="outline" onClick={() => setImportOpen(true)}>
-            <Upload className="w-4 h-4 mr-2" />
-            Import CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setAddStudentOpen(true)}>
+              <UserPlus className="w-4 h-4 mr-2" />
+              Add Student
+            </Button>
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="w-4 h-4 mr-2" />
+              Import CSV
+            </Button>
+          </div>
         }
       />
 
@@ -107,7 +126,7 @@ export function StudentListView() {
               </p>
               {!debouncedSearch && (
                 <p className="text-sm text-[rgb(var(--muted-foreground))] mt-1">
-                  Import students via CSV or create them through the API.
+                  Use the &quot;Add Student&quot; button or import via CSV to get started.
                 </p>
               )}
             </div>
@@ -186,6 +205,13 @@ export function StudentListView() {
                         </button>
                       ))
                     )}
+                    <button
+                      onClick={() => { setEnrollStudent(student); setEnrollOpen(true) }}
+                      className="w-full text-left p-2 rounded-lg text-sm text-medical-primary hover:bg-[rgb(var(--card-background))] transition-colors flex items-center gap-2"
+                    >
+                      <UserCheck className="w-4 h-4" />
+                      Enroll in Rotation
+                    </button>
                   </div>
                 )}
               </CardContent>
@@ -198,6 +224,19 @@ export function StudentListView() {
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onImportComplete={() => loadStudents(debouncedSearch || undefined)}
+      />
+
+      <AddStudentModal
+        open={addStudentOpen}
+        onClose={() => setAddStudentOpen(false)}
+        onStudentAdded={() => loadStudents(debouncedSearch || undefined)}
+      />
+
+      <EnrollStudentModal
+        open={enrollOpen}
+        onClose={() => { setEnrollOpen(false); setEnrollStudent(null) }}
+        onCreated={() => loadStudents(debouncedSearch || undefined)}
+        preselectedStudent={enrollStudent}
       />
     </div>
   )

@@ -22,10 +22,20 @@ export async function GET(request: NextRequest) {
         }
       : undefined;
 
+    const include = {
+      enrollments: {
+        include: {
+          rotation: {
+            include: { clerkship: true },
+          },
+        },
+      },
+    };
+
     if (paginate) {
       const { skip, take, page, pageSize } = parsePagination(request);
       const [students, total] = await Promise.all([
-        prisma.student.findMany({ where, orderBy: { name: 'asc' }, skip, take }),
+        prisma.student.findMany({ where, include, orderBy: { name: 'asc' }, skip, take }),
         prisma.student.count({ where }),
       ]);
       return NextResponse.json({
@@ -36,6 +46,7 @@ export async function GET(request: NextRequest) {
 
     const students = await prisma.student.findMany({
       where,
+      include,
       orderBy: { name: 'asc' },
     });
 
