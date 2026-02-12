@@ -14,8 +14,9 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 
 ## Current Status
 
-- **Phase:** All 8 phases complete — longitudinal upgrade fully implemented and tested
+- **Phase:** All 8 phases + pre-launch improvements complete
 - **Upgrade plan:** See `UPGRADE-PATH.md` for the full 8-phase plan
+- **Pre-launch:** Security (RBAC, rate limiting, audit logging), admin UI, export/reporting, UX polish, E2E tests all implemented
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
 
@@ -188,3 +189,43 @@ Implemented 2026-02-07:
 - Total: 306 tests across 11 test files (142 new + 164 existing), all passing
 - Build clean, no TypeScript errors in tests
 - No source files modified — test-only additions
+
+## Pre-Launch Improvements (2026-02-11)
+
+Implemented 5 parallel work streams to prepare for department-wide deployment:
+
+### Stream A — Security & RBAC
+- `requireAdmin()` middleware in `lib/api-auth.ts`, enforced on POST/PUT/DELETE across 8 API route files
+- User Management API: `app/api/users/route.ts` (GET list, POST create), `app/api/users/[id]/route.ts` (GET/PUT/DELETE)
+- Token bucket rate limiting (`lib/rate-limit.ts`) on auth, generate-narrative, generate-summary
+- Audit logging: `AuditLog` Prisma model + `lib/audit.ts` fire-and-forget helper
+
+### Stream B — Admin Management UI
+- 4 admin views: `ClerkshipManagementView`, `RotationManagementView`, `EnrollmentManagementView`, `UserManagementView`
+- 4 shared components: `DataTable` (sortable, paginated), `ConfirmDialog`, `FormModal`, `SearchFilter`
+- `lib/stores/adminStore.ts` — Zustand store with full CRUD for all admin entities
+- Role-gated "Administration" section in Sidebar, routing in MainContent
+
+### Stream C — UX Polish & Accessibility
+- Error boundaries: `app/error.tsx`, `app/loading.tsx`, `app/not-found.tsx`
+- Skeleton components: `Skeleton`, `CardSkeleton`, `TableSkeleton`
+- `Pagination` component + `parsePagination()` API helper (applied to students GET)
+- `Select` component, `Breadcrumbs`, `useFocusTrap` hook
+- ARIA: `aria-label` on nav, `aria-current="page"`, `aria-busy` on buttons, `aria-invalid`/`aria-describedby` on inputs
+
+### Stream D — Export & Reporting
+- `app/api/export-longitudinal-pdf/route.ts` — per-student progress PDF
+- `app/api/export-cohort-pdf/route.ts` — cohort-level report PDF
+- `app/api/export-data/route.ts` — CSV export (students/evaluations/enrollments/summaries), admin-only
+- `components/longitudinal/ExportPanel.tsx` — download buttons in StudentProgressView
+
+### Stream E — E2E Testing (Playwright)
+- `playwright.config.ts` — Chromium, webServer auto-start
+- 16 tests across 4 spec files: `auth.spec.ts`, `single-evaluation.spec.ts`, `longitudinal-tracking.spec.ts`, `admin-management.spec.ts`
+- Fixtures: `e2e/fixtures/test-data.ts`, `e2e/fixtures/setup.ts`
+
+### Additional
+- Migrated from `next lint` (removed in Next.js 16) to ESLint 9 flat config (`eslint.config.mjs`)
+- Fixed React 19 hydration lint with `useSyncExternalStore` in SettingsView
+- 332 unit tests passing (26 new), build clean, lint clean
+- Remaining: install `@playwright/test` devDep, manual smoke testing
