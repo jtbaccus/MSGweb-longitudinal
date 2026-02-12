@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useSession } from 'next-auth/react'
 import { ContentHeader } from '@/components/layout/ContentHeader'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -24,6 +25,8 @@ export function ExportReportView() {
     getPerformanceLevel,
   } = useEvaluationStore()
 
+  const { data: session } = useSession()
+
   const [studentName, setStudentName] = useState('')
   const [evaluatorName, setEvaluatorName] = useState('')
   const [evaluationDate, setEvaluationDate] = useState(
@@ -32,6 +35,54 @@ export function ExportReportView() {
   const [isExporting, setIsExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
   const [saveToRecordOpen, setSaveToRecordOpen] = useState(false)
+
+  // Student autocomplete state
+  const [studentSuggestions, setStudentSuggestions] = useState<string[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const studentInputRef = useRef<HTMLInputElement>(null)
+  const suggestionsRef = useRef<HTMLDivElement>(null)
+
+  // Auto-fill evaluator name from session
+  useEffect(() => {
+    if (session?.user?.name && !evaluatorName) {
+      setEvaluatorName(session.user.name)
+    }
+  }, [session?.user?.name]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch students enrolled in current clerkship
+  useEffect(() => {
+    if (!currentTemplate?.id) return
+
+    fetch('/api/students')
+      .then(res => res.ok ? res.json() : [])
+      .then((students: Array<{ name: string; enrollments: Array<{ rotation: { clerkship: { templateId: string } } }> }>) => {
+        const names = students
+          .filter(s => s.enrollments.some(e => e.rotation.clerkship.templateId === currentTemplate.id))
+          .map(s => s.name)
+        setStudentSuggestions(names)
+      })
+      .catch(() => setStudentSuggestions([]))
+  }, [currentTemplate?.id])
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (
+        suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node) &&
+        studentInputRef.current && !studentInputRef.current.contains(e.target as Node)
+      ) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const filteredSuggestions = studentName
+    ? studentSuggestions.filter(name =>
+        name.toLowerCase().includes(studentName.toLowerCase())
+      )
+    : studentSuggestions
 
   const [includeStrengths, setIncludeStrengths] = useState(true)
   const [includeAreasForImprovement, setIncludeAreasForImprovement] = useState(true)
@@ -143,13 +194,42 @@ export function ExportReportView() {
               <CardTitle>Report Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Input
-                label="Student Name"
-                value={studentName}
-                onChange={(e) => setStudentName(e.target.value)}
-                placeholder="Enter student name"
-                error={validation.errors.find(e => e.includes('Student'))}
-              />
+              <div className="relative">
+                <Input
+                  ref={studentInputRef}
+                  label="Student Name"
+                  value={studentName}
+                  onChange={(e) => {
+                    setStudentName(e.target.value)
+                    setShowSuggestions(true)
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  placeholder="Enter student name"
+                  error={validation.errors.find(e => e.includes('Student'))}
+                  autoComplete="off"
+                />
+                {showSuggestions && filteredSuggestions.length > 0 && (
+                  <div
+                    ref={suggestionsRef}
+                    className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--card-background))] shadow-lg"
+                  >
+                    {filteredSuggestions.map((name) => (
+                      <button
+                        key={name}
+                        type="button"
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-[rgb(var(--sidebar-background))] transition-colors"
+                        onMouseDown={(e) => {
+                          e.preventDefault()
+                          setStudentName(name)
+                          setShowSuggestions(false)
+                        }}
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <Input
                 label="Evaluator Name"
                 value={evaluatorName}
