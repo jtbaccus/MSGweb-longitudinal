@@ -33,8 +33,10 @@ const trendConfig = {
 }
 
 export function StudentProgressView() {
-  const progressView = useLongitudinalStore(state => state.getProgressView())
-  const periodStatuses = useLongitudinalStore(state => state.getPeriodStatuses())
+  const getProgressView = useLongitudinalStore(state => state.getProgressView)
+  const getPeriodStatuses = useLongitudinalStore(state => state.getPeriodStatuses)
+  const progressView = getProgressView()
+  const periodStatuses = getPeriodStatuses()
   const setIsInEvaluationFlow = useLongitudinalStore(state => state.setIsInEvaluationFlow)
   const loadTemplate = useEvaluationStore(state => state.loadTemplate)
   const setLongitudinalContext = useEvaluationStore(state => state.setLongitudinalContext)
