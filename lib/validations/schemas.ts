@@ -23,11 +23,11 @@ export const createClerkshipSchema = z
     type: z.enum(['STANDARD', 'MULTI_WEEK', 'LONGITUDINAL']),
     durationWeeks: z.number().int().positive(),
     midpointWeek: z.number().int().positive().optional().nullable(),
-    evaluationFrequency: z.enum(['WEEKLY', 'BIWEEKLY', 'MONTHLY']).optional().nullable(),
+    evaluationIntervalDays: z.number().int().positive().optional().nullable(),
   })
   .refine(
-    (data) => data.type !== 'LONGITUDINAL' || data.evaluationFrequency != null,
-    { message: 'LONGITUDINAL clerkships require evaluationFrequency', path: ['evaluationFrequency'] }
+    (data) => data.type !== 'LONGITUDINAL' || data.evaluationIntervalDays != null,
+    { message: 'LONGITUDINAL clerkships require evaluationIntervalDays', path: ['evaluationIntervalDays'] }
   )
   .refine(
     (data) => data.midpointWeek == null || data.midpointWeek < data.durationWeeks,
@@ -41,7 +41,7 @@ export const updateClerkshipSchema = z
     type: z.enum(['STANDARD', 'MULTI_WEEK', 'LONGITUDINAL']).optional(),
     durationWeeks: z.number().int().positive().optional(),
     midpointWeek: z.number().int().positive().optional().nullable(),
-    evaluationFrequency: z.enum(['WEEKLY', 'BIWEEKLY', 'MONTHLY']).optional().nullable(),
+    evaluationIntervalDays: z.number().int().positive().optional().nullable(),
   });
 
 // ============================================

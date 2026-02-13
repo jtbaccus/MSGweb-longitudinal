@@ -182,7 +182,7 @@ export function StudentProgressView() {
               evaluations={evaluations}
               totalPeriods={totalPeriods}
               midpointPeriod={clerkship.midpointWeek ? Math.ceil(clerkship.midpointWeek / (clerkship.durationWeeks / totalPeriods)) : undefined}
-              frequency={clerkship.evaluationFrequency ?? undefined}
+              intervalDays={clerkship.evaluationIntervalDays ?? undefined}
             />
           </CardContent>
         </Card>

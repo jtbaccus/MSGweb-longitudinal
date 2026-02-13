@@ -27,7 +27,7 @@ const mockClerkship: Clerkship = {
   templateId: 't1',
   type: 'LONGITUDINAL',
   durationWeeks: 8,
-  evaluationFrequency: 'WEEKLY',
+  evaluationIntervalDays: 7,
   createdAt: new Date(),
 }
 

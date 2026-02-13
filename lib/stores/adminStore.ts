@@ -18,7 +18,7 @@ interface AdminClerkship {
   type: string
   durationWeeks: number
   midpointWeek: number | null
-  evaluationFrequency: string | null
+  evaluationIntervalDays: number | null
   createdAt: string
   [key: string]: unknown
 }

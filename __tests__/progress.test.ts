@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
-  getPeriodDays,
   calculateTotalPeriods,
   calculateCurrentPeriod,
   calculateTrend,
@@ -23,7 +22,7 @@ function makeClerkship(overrides: Partial<Clerkship> = {}): Clerkship {
     templateId: 't1',
     type: 'LONGITUDINAL',
     durationWeeks: 8,
-    evaluationFrequency: 'WEEKLY',
+    evaluationIntervalDays: 7,
     createdAt: new Date(),
     ...overrides,
   }
@@ -61,62 +60,50 @@ function makeEnrollment(overrides: Partial<StudentEnrollment> = {}): StudentEnro
 }
 
 // ---------------------------------------------------------------------------
-// getPeriodDays
-// ---------------------------------------------------------------------------
-
-describe('getPeriodDays', () => {
-  it('returns 7 for WEEKLY', () => {
-    expect(getPeriodDays('WEEKLY')).toBe(7)
-  })
-
-  it('returns 14 for BIWEEKLY', () => {
-    expect(getPeriodDays('BIWEEKLY')).toBe(14)
-  })
-
-  it('returns 28 for MONTHLY', () => {
-    expect(getPeriodDays('MONTHLY')).toBe(28)
-  })
-})
-
-// ---------------------------------------------------------------------------
 // calculateTotalPeriods
 // ---------------------------------------------------------------------------
 
 describe('calculateTotalPeriods', () => {
-  it('returns 1 when no evaluationFrequency', () => {
-    const c = makeClerkship({ evaluationFrequency: null })
+  it('returns 1 when no evaluationIntervalDays', () => {
+    const c = makeClerkship({ evaluationIntervalDays: null })
     expect(calculateTotalPeriods(c)).toBe(1)
   })
 
-  it('returns 8 for WEEKLY with 8 weeks', () => {
-    const c = makeClerkship({ durationWeeks: 8, evaluationFrequency: 'WEEKLY' })
+  it('returns 8 for 7-day interval with 8 weeks', () => {
+    const c = makeClerkship({ durationWeeks: 8, evaluationIntervalDays: 7 })
     expect(calculateTotalPeriods(c)).toBe(8)
   })
 
-  it('returns 4 for BIWEEKLY with 8 weeks', () => {
-    const c = makeClerkship({ durationWeeks: 8, evaluationFrequency: 'BIWEEKLY' })
+  it('returns 4 for 14-day interval with 8 weeks', () => {
+    const c = makeClerkship({ durationWeeks: 8, evaluationIntervalDays: 14 })
     expect(calculateTotalPeriods(c)).toBe(4)
   })
 
-  it('returns 7 for MONTHLY with 26 weeks (ceil(182/28))', () => {
-    const c = makeClerkship({ durationWeeks: 26, evaluationFrequency: 'MONTHLY' })
+  it('returns 7 for 28-day interval with 26 weeks (ceil(182/28))', () => {
+    const c = makeClerkship({ durationWeeks: 26, evaluationIntervalDays: 28 })
     // 26*7 = 182 days / 28 = 6.5 → ceil = 7
     expect(calculateTotalPeriods(c)).toBe(7)
   })
 
-  it('returns 1 for a 1-week clerkship with WEEKLY', () => {
-    const c = makeClerkship({ durationWeeks: 1, evaluationFrequency: 'WEEKLY' })
+  it('returns 1 for a 1-week clerkship with 7-day interval', () => {
+    const c = makeClerkship({ durationWeeks: 1, evaluationIntervalDays: 7 })
     expect(calculateTotalPeriods(c)).toBe(1)
   })
 
-  it('returns 2 for BIWEEKLY with 3 weeks (ceil(21/14))', () => {
-    const c = makeClerkship({ durationWeeks: 3, evaluationFrequency: 'BIWEEKLY' })
+  it('returns 2 for 14-day interval with 3 weeks (ceil(21/14))', () => {
+    const c = makeClerkship({ durationWeeks: 3, evaluationIntervalDays: 14 })
     expect(calculateTotalPeriods(c)).toBe(2)
   })
 
-  it('returns 1 for MONTHLY with 4 weeks', () => {
-    const c = makeClerkship({ durationWeeks: 4, evaluationFrequency: 'MONTHLY' })
+  it('returns 1 for 28-day interval with 4 weeks', () => {
+    const c = makeClerkship({ durationWeeks: 4, evaluationIntervalDays: 28 })
     expect(calculateTotalPeriods(c)).toBe(1)
+  })
+
+  it('returns 8 for 21-day interval with 24 weeks (ceil(168/21))', () => {
+    const c = makeClerkship({ durationWeeks: 24, evaluationIntervalDays: 21 })
+    // 24*7 = 168 days / 21 = 8
+    expect(calculateTotalPeriods(c)).toBe(8)
   })
 })
 
@@ -129,18 +116,18 @@ describe('calculateCurrentPeriod', () => {
     vi.useRealTimers()
   })
 
-  it('returns 1 when no evaluationFrequency', () => {
-    const c = makeClerkship({ evaluationFrequency: null })
+  it('returns 1 when no evaluationIntervalDays', () => {
+    const c = makeClerkship({ evaluationIntervalDays: null })
     expect(calculateCurrentPeriod(new Date(), c)).toBe(1)
   })
 
   it('returns correct period for a date in the past', () => {
     vi.useFakeTimers()
-    // Start date 15 days ago → for WEEKLY, period = floor(15/7) + 1 = 3
+    // Start date 15 days ago → for 7-day interval, period = floor(15/7) + 1 = 3
     const now = new Date('2025-02-01')
     vi.setSystemTime(now)
     const start = new Date('2025-01-17') // 15 days before Feb 1
-    const c = makeClerkship({ durationWeeks: 8, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 8, evaluationIntervalDays: 7 })
     expect(calculateCurrentPeriod(start, c)).toBe(3)
   })
 
@@ -148,16 +135,16 @@ describe('calculateCurrentPeriod', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2025-01-01'))
     const futureStart = new Date('2025-03-01')
-    const c = makeClerkship({ durationWeeks: 8, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 8, evaluationIntervalDays: 7 })
     expect(calculateCurrentPeriod(futureStart, c)).toBe(1)
   })
 
   it('clamps to total when past the end', () => {
     vi.useFakeTimers()
-    // Start was 100 days ago, 8 WEEKLY periods = 56 days total
+    // Start was 100 days ago, 8 periods of 7 days = 56 days total
     vi.setSystemTime(new Date('2025-04-16'))
     const start = new Date('2025-01-06') // 100 days before Apr 16
-    const c = makeClerkship({ durationWeeks: 8, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 8, evaluationIntervalDays: 7 })
     expect(calculateCurrentPeriod(start, c)).toBe(8)
   })
 
@@ -165,7 +152,7 @@ describe('calculateCurrentPeriod', () => {
     vi.useFakeTimers()
     const start = new Date('2025-01-06')
     vi.setSystemTime(start)
-    const c = makeClerkship({ durationWeeks: 8, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 8, evaluationIntervalDays: 7 })
     expect(calculateCurrentPeriod(start, c)).toBe(1)
   })
 
@@ -174,7 +161,7 @@ describe('calculateCurrentPeriod', () => {
     const start = new Date('2025-01-06')
     // Day 7 → period 2 (floor(7/7)+1=2)
     vi.setSystemTime(new Date('2025-01-13'))
-    const c = makeClerkship({ durationWeeks: 8, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 8, evaluationIntervalDays: 7 })
     expect(calculateCurrentPeriod(start, c)).toBe(2)
   })
 })
@@ -308,21 +295,21 @@ describe('calculateTrend', () => {
 
 describe('calculatePeriodStatuses', () => {
   it('returns correct number of statuses', () => {
-    const c = makeClerkship({ durationWeeks: 4, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 4, evaluationIntervalDays: 7 })
     const en = makeEnrollment()
     const statuses = calculatePeriodStatuses(en, c, [])
     expect(statuses).toHaveLength(4)
   })
 
-  it('returns 1 status when no evaluationFrequency', () => {
-    const c = makeClerkship({ evaluationFrequency: null, durationWeeks: 8 })
+  it('returns 1 status when no evaluationIntervalDays', () => {
+    const c = makeClerkship({ evaluationIntervalDays: null, durationWeeks: 8 })
     const en = makeEnrollment()
     const statuses = calculatePeriodStatuses(en, c, [])
     expect(statuses).toHaveLength(1)
   })
 
   it('matches completed evaluations by periodNumber', () => {
-    const c = makeClerkship({ durationWeeks: 4, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 4, evaluationIntervalDays: 7 })
     const en = makeEnrollment()
     const eval2 = makeEvaluation({ id: 'e2', periodNumber: 2 })
     const statuses = calculatePeriodStatuses(en, c, [eval2])
@@ -334,7 +321,7 @@ describe('calculatePeriodStatuses', () => {
   })
 
   it('ignores incomplete evaluations', () => {
-    const c = makeClerkship({ durationWeeks: 2, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 2, evaluationIntervalDays: 7 })
     const en = makeEnrollment()
     const draft = makeEvaluation({ id: 'e1', periodNumber: 1, isComplete: false })
     const statuses = calculatePeriodStatuses(en, c, [draft])
@@ -346,7 +333,7 @@ describe('calculatePeriodStatuses', () => {
     const start = new Date('2025-01-06')
     // Set time to day 10 → period 2 for WEEKLY
     vi.setSystemTime(new Date('2025-01-16'))
-    const c = makeClerkship({ durationWeeks: 4, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 4, evaluationIntervalDays: 7 })
     const en = makeEnrollment({ startDate: start })
     const statuses = calculatePeriodStatuses(en, c, [])
 
@@ -364,7 +351,7 @@ describe('calculatePeriodStatuses', () => {
 
   it('calculates period dates correctly', () => {
     const start = new Date('2025-01-06')
-    const c = makeClerkship({ durationWeeks: 2, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 2, evaluationIntervalDays: 7 })
     const en = makeEnrollment({ startDate: start })
     const statuses = calculatePeriodStatuses(en, c, [])
 
@@ -377,7 +364,7 @@ describe('calculatePeriodStatuses', () => {
   })
 
   it('assigns sequential periodNumbers', () => {
-    const c = makeClerkship({ durationWeeks: 4, evaluationFrequency: 'WEEKLY' })
+    const c = makeClerkship({ durationWeeks: 4, evaluationIntervalDays: 7 })
     const en = makeEnrollment()
     const statuses = calculatePeriodStatuses(en, c, [])
     expect(statuses.map((s) => s.periodNumber)).toEqual([1, 2, 3, 4])

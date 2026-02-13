@@ -4,27 +4,13 @@ import type {
   StudentEnrollment,
   PeriodStatus,
   PerformanceTrend,
-  EvaluationFrequency,
 } from '@/lib/types/longitudinal';
-
-/** Map frequency enum to number of days per period. */
-export function getPeriodDays(frequency: EvaluationFrequency): number {
-  switch (frequency) {
-    case 'WEEKLY':
-      return 7;
-    case 'BIWEEKLY':
-      return 14;
-    case 'MONTHLY':
-      return 28;
-  }
-}
 
 /** Calculate total evaluation periods for a clerkship. */
 export function calculateTotalPeriods(clerkship: Clerkship): number {
-  if (!clerkship.evaluationFrequency) return 1;
+  if (!clerkship.evaluationIntervalDays) return 1;
   const totalDays = clerkship.durationWeeks * 7;
-  const periodDays = getPeriodDays(clerkship.evaluationFrequency);
-  return Math.ceil(totalDays / periodDays);
+  return Math.ceil(totalDays / clerkship.evaluationIntervalDays);
 }
 
 /** Calculate which period number the enrollment is currently in. */
@@ -32,12 +18,11 @@ export function calculateCurrentPeriod(
   startDate: Date,
   clerkship: Clerkship
 ): number {
-  if (!clerkship.evaluationFrequency) return 1;
+  if (!clerkship.evaluationIntervalDays) return 1;
   const now = new Date();
   const elapsed = now.getTime() - new Date(startDate).getTime();
   const daysElapsed = Math.floor(elapsed / (1000 * 60 * 60 * 24));
-  const periodDays = getPeriodDays(clerkship.evaluationFrequency);
-  const period = Math.floor(daysElapsed / periodDays) + 1;
+  const period = Math.floor(daysElapsed / clerkship.evaluationIntervalDays) + 1;
   const total = calculateTotalPeriods(clerkship);
   return Math.min(Math.max(period, 1), total);
 }
@@ -83,8 +68,8 @@ export function calculatePeriodStatuses(
 ): PeriodStatus[] {
   const total = calculateTotalPeriods(clerkship);
   const current = calculateCurrentPeriod(enrollment.startDate, clerkship);
-  const periodDays = clerkship.evaluationFrequency
-    ? getPeriodDays(clerkship.evaluationFrequency)
+  const periodDays = clerkship.evaluationIntervalDays
+    ? clerkship.evaluationIntervalDays
     : clerkship.durationWeeks * 7;
 
   const start = new Date(enrollment.startDate);

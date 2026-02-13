@@ -1,12 +1,12 @@
 'use client'
 
-import type { SavedEvaluation, EvaluationFrequency } from '@/lib/types'
+import type { SavedEvaluation } from '@/lib/types'
 
 interface PerformanceChartProps {
   evaluations: SavedEvaluation[]
   totalPeriods: number
   midpointPeriod?: number
-  frequency?: EvaluationFrequency
+  intervalDays?: number
 }
 
 const LEVEL_Y: Record<string, number> = {

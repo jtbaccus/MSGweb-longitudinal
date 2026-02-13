@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/Input'
 import { X, BookOpen } from 'lucide-react'
 import { defaultTemplates } from '@/lib/data/templates'
 import { useLongitudinalStore } from '@/lib/stores/longitudinalStore'
-import type { ClerkshipType, EvaluationFrequency } from '@/lib/types'
+import type { ClerkshipType } from '@/lib/types'
 
 interface SetupClerkshipModalProps {
   open: boolean
@@ -22,7 +22,7 @@ export function SetupClerkshipModal({ open, onClose, onCreated }: SetupClerkship
   const [type, setType] = useState<ClerkshipType>('STANDARD')
   const [durationWeeks, setDurationWeeks] = useState(4)
   const [midpointWeek, setMidpointWeek] = useState<string>('')
-  const [evaluationFrequency, setEvaluationFrequency] = useState<EvaluationFrequency | ''>('')
+  const [evaluationIntervalDays, setEvaluationIntervalDays] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -37,7 +37,7 @@ export function SetupClerkshipModal({ open, onClose, onCreated }: SetupClerkship
   }
 
   const isValid = name.trim() && templateId && durationWeeks > 0 &&
-    (type !== 'LONGITUDINAL' || evaluationFrequency)
+    (type !== 'LONGITUDINAL' || (evaluationIntervalDays && parseInt(evaluationIntervalDays) > 0))
 
   const handleSubmit = async () => {
     if (!isValid) return
@@ -50,7 +50,7 @@ export function SetupClerkshipModal({ open, onClose, onCreated }: SetupClerkship
         type,
         durationWeeks,
         midpointWeek: midpointWeek ? parseInt(midpointWeek) : null,
-        evaluationFrequency: evaluationFrequency || null,
+        evaluationIntervalDays: evaluationIntervalDays ? parseInt(evaluationIntervalDays) : null,
       })
       onCreated()
       handleClose()
@@ -67,7 +67,7 @@ export function SetupClerkshipModal({ open, onClose, onCreated }: SetupClerkship
     setType('STANDARD')
     setDurationWeeks(4)
     setMidpointWeek('')
-    setEvaluationFrequency('')
+    setEvaluationIntervalDays('')
     setError(null)
     onClose()
   }
@@ -142,17 +142,17 @@ export function SetupClerkshipModal({ open, onClose, onCreated }: SetupClerkship
 
           {type === 'LONGITUDINAL' && (
             <div>
-              <label className="block text-sm font-medium mb-1">Evaluation Frequency</label>
-              <select
-                value={evaluationFrequency}
-                onChange={(e) => setEvaluationFrequency(e.target.value as EvaluationFrequency)}
-                className="w-full px-3 py-2 rounded-lg input-bg text-sm focus:outline-none focus:ring-2 focus:ring-medical-primary"
-              >
-                <option value="">Select frequency...</option>
-                <option value="WEEKLY">Weekly</option>
-                <option value="BIWEEKLY">Biweekly</option>
-                <option value="MONTHLY">Monthly</option>
-              </select>
+              <Input
+                label="Evaluation Interval (days)"
+                type="number"
+                value={evaluationIntervalDays}
+                onChange={(e) => setEvaluationIntervalDays(e.target.value)}
+                placeholder="e.g., 7 = weekly, 14 = biweekly, 21 = every 3 weeks"
+                min={1}
+              />
+              <p className="text-xs text-[rgb(var(--muted-foreground))] mt-1">
+                e.g., 7 = weekly, 14 = biweekly, 21 = every 3 weeks
+              </p>
             </div>
           )}
 

@@ -16,13 +16,12 @@ Smoke test readiness — schema flexibility change + comprehensive seed script f
 
 ## In Progress
 
-- [ ] Schema change: `evaluationFrequency` enum → `evaluationIntervalDays` (agent prompt ready, not yet dispatched)
-- [ ] Seed script: comprehensive test data for all features (bundled with schema change)
+- [x] Schema change: `evaluationFrequency` enum → `evaluationIntervalDays` (**D-1 dispatched 2026-02-13**)
+- [x] Seed script: comprehensive test data for all features (**bundled with D-1**)
 
 ## Next Up
 
-- [ ] Dispatch agent for schema change + seed script
-- [ ] Verify build + tests after schema change
+- [ ] Verify build + tests after D-1 completes
 - [ ] Run seed against database
 - [ ] Manual smoke testing of all features
 - [ ] Activity log + documentation updates

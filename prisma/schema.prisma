@@ -19,12 +19,6 @@ enum ClerkshipType {
   LONGITUDINAL  // 6 months, periodic evaluations
 }
 
-enum EvaluationFrequency {
-  WEEKLY
-  BIWEEKLY
-  MONTHLY
-}
-
 enum EnrollmentStatus {
   ACTIVE
   COMPLETED
@@ -126,7 +120,7 @@ model Clerkship {
   type                ClerkshipType        @default(STANDARD)
   durationWeeks       Int                  // 1, 2, 8, or 26 (6 months)
   midpointWeek        Int?                 // Week number for mid-course feedback
-  evaluationFrequency EvaluationFrequency? // For LONGITUDINAL type
+  evaluationIntervalDays Int?                 // Days between evaluations (e.g., 7=weekly, 14=biweekly, 21=every 3 weeks)
   createdAt           DateTime             @default(now())
   rotations           Rotation[]
 }

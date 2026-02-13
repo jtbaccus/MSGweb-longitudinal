@@ -58,7 +58,7 @@ interface LongitudinalState {
   clearError: () => void
   setIsInEvaluationFlow: (value: boolean) => void
   createStudent: (data: { name: string; email?: string | null; medicalSchoolId?: string | null }) => Promise<Student>
-  createClerkship: (data: { name: string; templateId: string; type: string; durationWeeks: number; midpointWeek?: number | null; evaluationFrequency?: string | null }) => Promise<Clerkship>
+  createClerkship: (data: { name: string; templateId: string; type: string; durationWeeks: number; midpointWeek?: number | null; evaluationIntervalDays?: number | null }) => Promise<Clerkship>
   createRotation: (data: { clerkshipId: string; startDate: string; endDate: string; academicYear: string }) => Promise<Rotation>
   createEnrollment: (data: { studentId: string; rotationId: string; startDate: string }) => Promise<StudentEnrollment>
 

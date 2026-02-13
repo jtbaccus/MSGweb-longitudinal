@@ -157,13 +157,9 @@ export async function POST(request: NextRequest) {
     const clerkship = enrollment.rotation.clerkship;
     let evaluationsToInclude = completedEvaluations;
     if (type === 'MID_COURSE' && clerkship.midpointWeek) {
-      const midpointPeriod = Math.ceil(
-        clerkship.midpointWeek /
-          (clerkship.durationWeeks / (clerkship.durationWeeks / (
-            clerkship.evaluationFrequency === 'WEEKLY' ? 1 :
-            clerkship.evaluationFrequency === 'BIWEEKLY' ? 2 : 4
-          )))
-      );
+      const intervalDays = clerkship.evaluationIntervalDays || 7;
+      const midpointDays = clerkship.midpointWeek * 7;
+      const midpointPeriod = Math.ceil(midpointDays / intervalDays);
       evaluationsToInclude = completedEvaluations.filter(
         (e) => e.periodNumber <= midpointPeriod
       );
