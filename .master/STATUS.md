@@ -4,7 +4,7 @@ Last updated: 2026-02-13
 
 ## Current Objective
 
-Manual smoke testing — seed the database, verify all features end-to-end
+Smoke testing passed — ready for deeper testing or next phase of work
 
 ## Completed
 
@@ -16,24 +16,16 @@ Manual smoke testing — seed the database, verify all features end-to-end
 - [x] D-1 dispatched and completed (2026-02-13): schema change + seed script
 - [x] Verified: build clean, 330/330 tests pass
 - [x] Committed and pushed (`9beff15`), parent turing updated (`d100cb7`)
+- [x] Schema pushed to database (`prisma db push`)
+- [x] Seed run successfully (4 users, 7 clerkships, 6 rotations, 8 students, 15 enrollments, 66 evaluations, 6 summaries)
+- [x] Manual smoke testing — all features passing
 
 ## Next Up
 
-- [ ] Push schema to database: `npx prisma db push`
-- [ ] Run seed: `npx tsx prisma/seed.ts`
-- [ ] Manual smoke testing checklist:
-  - [ ] Login flow (admin + regular user)
-  - [ ] Single evaluation workflow (template → criteria → attributes → narrative → generate → export)
-  - [ ] Longitudinal dashboard (stats, active rotations)
-  - [ ] Student list (search, expand enrollments, CSV import)
-  - [ ] Student progress view (timeline, chart, evaluations list, export panel)
-  - [ ] New evaluation from longitudinal (eval flow → save & return)
-  - [ ] Save to record from single mode (bridge modal)
-  - [ ] Mid-course + end-course summary generation
-  - [ ] Admin views (clerkships, rotations, enrollments, users CRUD)
-  - [ ] Settings (mode toggle, narrative length, theme)
-- [ ] Fix any issues found during smoke testing
+- [ ] Deeper feature testing / edge cases if needed
 - [ ] Update CONTEXT.md with smoke test results
+- [ ] Update PR #7 on production MSGweb for merge-back (post-schema change)
+- [ ] Flesh out placeholder templates (5 clerkships with only 3 criteria each)
 
 ## Key Context
 
@@ -43,6 +35,6 @@ Manual smoke testing — seed the database, verify all features end-to-end
 - PR #7 open on production MSGweb for merge-back (will need updating after schema change)
 - Only 2 templates fully detailed: `internal-medicine` (69 criteria) and `neurology` (69 criteria)
 - Other 5 templates are placeholders with 3 criteria each
-- Seed script: 4 users, 7 clerkships, 6 rotations, 8 students, 15 enrollments, ~38 evaluations, 6 summaries
+- Seed script: 4 users, 7 clerkships, 6 rotations, 8 students, 15 enrollments, 66 evaluations, 6 summaries
 - Decisions log: `.master/DECISIONS.md` (D1-D3)
 - Dispatch log: `.master/DISPATCH-LOG.md` (D-1 complete)
