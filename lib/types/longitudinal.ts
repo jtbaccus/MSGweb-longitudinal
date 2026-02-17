@@ -1,5 +1,5 @@
 // lib/types/longitudinal.ts
-// TypeScript interfaces for Phase 2 longitudinal tracking models.
+// TypeScript interfaces for longitudinal tracking models.
 // Enum type aliases are string unions decoupled from Prisma imports
 // so they work in client components.
 
