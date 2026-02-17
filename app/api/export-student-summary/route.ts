@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import ReactPDF, { Document, Page, Text, View, StyleSheet, DocumentProps } from '@react-pdf/renderer'
 import React, { ReactElement } from 'react'
+import { requireAuth } from '@/lib/api-auth'
 
 const styles = StyleSheet.create({
   page: {
@@ -139,6 +140,9 @@ function StudentSummaryDocument({ strengths, areasForImprovement }: StudentSumma
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth()
+  if (auth.error) return auth.error
+
   try {
     const body = await request.json()
     const { strengths, areasForImprovement } = body

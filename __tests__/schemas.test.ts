@@ -70,7 +70,7 @@ describe('createClerkshipSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('rejects LONGITUDINAL without evaluationFrequency', () => {
+  it('rejects LONGITUDINAL without evaluationIntervalDays', () => {
     const result = createClerkshipSchema.safeParse({
       ...baseClerkship,
       type: 'LONGITUDINAL',
@@ -78,15 +78,15 @@ describe('createClerkshipSchema', () => {
     expect(result.success).toBe(false)
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain('LONGITUDINAL clerkships require evaluationFrequency')
+      expect(messages).toContain('LONGITUDINAL clerkships require evaluationIntervalDays')
     }
   })
 
-  it('accepts LONGITUDINAL with evaluationFrequency', () => {
+  it('accepts LONGITUDINAL with evaluationIntervalDays', () => {
     const result = createClerkshipSchema.safeParse({
       ...baseClerkship,
       type: 'LONGITUDINAL',
-      evaluationFrequency: 'WEEKLY',
+      evaluationIntervalDays: 7,
     })
     expect(result.success).toBe(true)
   })

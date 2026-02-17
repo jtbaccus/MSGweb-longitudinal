@@ -1,5 +1,5 @@
 // lib/types/longitudinal.ts
-// TypeScript interfaces for Phase 2 longitudinal tracking models.
+// TypeScript interfaces for longitudinal tracking models.
 // Enum type aliases are string unions decoupled from Prisma imports
 // so they work in client components.
 
@@ -10,7 +10,6 @@ import type { PerformanceLevel, NavigationTab } from './index'
 // ============================================
 
 export type ClerkshipType = 'STANDARD' | 'MULTI_WEEK' | 'LONGITUDINAL'
-export type EvaluationFrequency = 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY'
 export type SummaryType = 'MID_COURSE' | 'END_OF_COURSE' | 'PROGRESS'
 export type EnrollmentStatus = 'ACTIVE' | 'COMPLETED' | 'WITHDRAWN'
 
@@ -25,7 +24,7 @@ export interface Clerkship {
   type: ClerkshipType
   durationWeeks: number
   midpointWeek?: number | null
-  evaluationFrequency?: EvaluationFrequency | null
+  evaluationIntervalDays?: number | null
   createdAt: Date
   rotations?: Rotation[]
 }

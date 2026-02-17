@@ -138,7 +138,6 @@ export async function POST(request: NextRequest) {
     const stream = await openai.responses.create({
       model: 'openai/gpt-oss-120b:nitro',
       reasoning: { effort: "low" },
-      // text: { verbosity: "low" },
       input: [
         { role: 'system', content: buildSystemPrompt(minWords, maxWords) },
         { role: 'user', content: userPrompt },

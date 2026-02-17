@@ -14,9 +14,15 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 
 ## Current Status
 
-- **Phase:** All 9 phases + pre-launch improvements complete
+- **Phase:** All 9 phases + pre-launch improvements + schema flexibility complete
+- **Smoke testing (2026-02-13):** All features passing — auth, CRUD, evaluations, summaries, CSV import, PDF export, admin panel
+- **Edge case testing (2026-02-16):** 427 tests across 20 test files (97 new edge case tests), code cleanup & hardening complete
 - **Upgrade plan:** See `UPGRADE-PATH.md` for the full 9-phase plan
 - **Pre-launch:** Security (RBAC, rate limiting, audit logging), admin UI, export/reporting, UX polish, E2E tests all implemented
+- **Schema flexibility (2026-02-13):** `EvaluationFrequency` enum replaced with `evaluationIntervalDays: Int?` — flexible numeric interval for any eval cadence
+- **Seed script (2026-02-13):** Comprehensive test data (4 users, 7 clerkships, 6 rotations, 8 students, 15 enrollments, 66 evaluations, 6 summaries)
+- **Templates:** Only 2 fully detailed (internal-medicine, neurology — 69 criteria each); 5 other clerkships have 3-criteria placeholders
+- **Next:** Finalize placeholder templates with real criteria, update PR #7 for merge-back
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
 
@@ -56,10 +62,18 @@ Implemented 2026-02-06:
 - `lib/api-auth.ts`: `requireAuth()` helper for API routes
 - All 164 existing tests pass
 
+## Schema Flexibility (2026-02-13)
+
+- Removed `EvaluationFrequency` enum (WEEKLY/BIWEEKLY/MONTHLY) — too rigid for real curriculum
+- Added `evaluationIntervalDays: Int?` on Clerkship model (e.g., 7=weekly, 21=every 3 weeks)
+- Updated across 18 files: schema, types, validations, progress utils, stores, UI, tests
+- Comprehensive seed script: 751 lines, idempotent, real curriculum data with progression stories
+- 330 tests pass (2 old enum-specific tests removed), build clean
+
 ## Phase 2 Summary (Database Schema)
 
 Implemented 2026-02-06:
-- 5 new enums: `ClerkshipType`, `EvaluationFrequency`, `EnrollmentStatus`, `PerformanceLevel`, `SummaryType`
+- 5 new enums: `ClerkshipType`, ~~`EvaluationFrequency`~~ (removed 2026-02-13), `EnrollmentStatus`, `PerformanceLevel`, `SummaryType`
 - 6 new models: `Clerkship`, `Rotation`, `Student`, `StudentEnrollment`, `Evaluation`, `ProgressSummary`
 - `User` model: added `evaluations` and `summaries` relation fields (Phase 1 fields preserved)
 - Indexes on `Evaluation` (enrollmentId, periodNumber) and `ProgressSummary` (enrollmentId, type)

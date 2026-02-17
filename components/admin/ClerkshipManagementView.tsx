@@ -20,7 +20,7 @@ type ClerkshipRow = {
   type: string
   durationWeeks: number
   midpointWeek: number | null
-  evaluationFrequency: string | null
+  evaluationIntervalDays: number | null
   [key: string]: unknown
 }
 
@@ -30,20 +30,13 @@ const typeOptions = [
   { value: 'LONGITUDINAL', label: 'Longitudinal' },
 ]
 
-const frequencyOptions = [
-  { value: '', label: 'None' },
-  { value: 'WEEKLY', label: 'Weekly' },
-  { value: 'BIWEEKLY', label: 'Biweekly' },
-  { value: 'MONTHLY', label: 'Monthly' },
-]
-
 const initialForm = {
   name: '',
   templateId: '',
   type: 'STANDARD',
   durationWeeks: '',
   midpointWeek: '',
-  evaluationFrequency: '',
+  evaluationIntervalDays: '',
 }
 
 export function ClerkshipManagementView() {
@@ -89,7 +82,7 @@ export function ClerkshipManagementView() {
       type: item.type,
       durationWeeks: String(item.durationWeeks),
       midpointWeek: item.midpointWeek ? String(item.midpointWeek) : '',
-      evaluationFrequency: item.evaluationFrequency || '',
+      evaluationIntervalDays: item.evaluationIntervalDays ? String(item.evaluationIntervalDays) : '',
     })
     setEditId(item.id)
     setShowForm(true)
@@ -102,7 +95,7 @@ export function ClerkshipManagementView() {
       type: form.type,
       durationWeeks: Number(form.durationWeeks),
       midpointWeek: form.midpointWeek ? Number(form.midpointWeek) : null,
-      evaluationFrequency: form.evaluationFrequency || null,
+      evaluationIntervalDays: form.evaluationIntervalDays ? Number(form.evaluationIntervalDays) : null,
     }
     try {
       if (editId) {
@@ -162,7 +155,7 @@ export function ClerkshipManagementView() {
         <Select label="Type" options={typeOptions} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} />
         <Input label="Duration (weeks)" type="number" value={form.durationWeeks} onChange={e => setForm(f => ({ ...f, durationWeeks: e.target.value }))} />
         <Input label="Midpoint Week (optional)" type="number" value={form.midpointWeek} onChange={e => setForm(f => ({ ...f, midpointWeek: e.target.value }))} />
-        <Select label="Evaluation Frequency" options={frequencyOptions} value={form.evaluationFrequency} onChange={e => setForm(f => ({ ...f, evaluationFrequency: e.target.value }))} />
+        <Input label="Evaluation Interval (days)" type="number" value={form.evaluationIntervalDays} onChange={e => setForm(f => ({ ...f, evaluationIntervalDays: e.target.value }))} />
       </FormModal>
 
       <ConfirmDialog

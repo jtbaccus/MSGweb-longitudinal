@@ -73,10 +73,9 @@ export interface WordCountPresetConfig {
   range: WordCountRange
 }
 
-// Longitudinal tracking types (Phase 3)
+// Longitudinal tracking types
 export type {
   ClerkshipType,
-  EvaluationFrequency,
   SummaryType,
   EnrollmentStatus,
   Clerkship,
