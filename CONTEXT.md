@@ -15,11 +15,14 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 ## Current Status
 
 - **Phase:** All 9 phases + pre-launch improvements + schema flexibility complete
+- **Smoke testing (2026-02-13):** All features passing — auth, CRUD, evaluations, summaries, CSV import, PDF export, admin panel
+- **Edge case testing (2026-02-16):** 427 tests across 20 test files (97 new edge case tests), code cleanup & hardening complete
 - **Upgrade plan:** See `UPGRADE-PATH.md` for the full 9-phase plan
 - **Pre-launch:** Security (RBAC, rate limiting, audit logging), admin UI, export/reporting, UX polish, E2E tests all implemented
 - **Schema flexibility (2026-02-13):** `EvaluationFrequency` enum replaced with `evaluationIntervalDays: Int?` — flexible numeric interval for any eval cadence
-- **Seed script (2026-02-13):** Comprehensive test data (4 users, 7 clerkships, 6 rotations, 8 students, 15 enrollments, ~38 evaluations, 6 summaries)
-- **Next:** Run seed against DB, manual smoke testing (see `.master/STATUS.md` for checklist)
+- **Seed script (2026-02-13):** Comprehensive test data (4 users, 7 clerkships, 6 rotations, 8 students, 15 enrollments, 66 evaluations, 6 summaries)
+- **Templates:** Only 2 fully detailed (internal-medicine, neurology — 69 criteria each); 5 other clerkships have 3-criteria placeholders
+- **Next:** Finalize placeholder templates with real criteria, update PR #7 for merge-back
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
 
