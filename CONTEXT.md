@@ -22,7 +22,14 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 - **Schema flexibility (2026-02-13):** `EvaluationFrequency` enum replaced with `evaluationIntervalDays: Int?` — flexible numeric interval for any eval cadence
 - **Seed script (2026-02-13):** Comprehensive test data (4 users, 7 clerkships, 6 rotations, 8 students, 15 enrollments, 66 evaluations, 6 summaries)
 - **Templates:** Only 2 fully detailed (internal-medicine, neurology — 69 criteria each); 5 other clerkships have 3-criteria placeholders
-- **Next:** Finalize placeholder templates with real criteria, update PR #7 for merge-back
+
+## MERGE STATUS — DO NOT MERGE
+
+**PR #7 is OPEN but NOT approved for merge.** Jon is performing manual testing of longitudinal features on the `feature/longitudinal-upgrade` branch. He will explicitly say when he wants it merged to `main`.
+
+PR #7 was accidentally merged on 2026-02-15 and **reverted on 2026-02-22** because it broke the live Vercel deployment (auth required a production database that wasn't configured). `main` has been reset to its pre-merge state.
+
+**No agent or automated process should merge PR #7. Jon decides when.**
 
 ## Upgrade Phases (from UPGRADE-PATH.md)
 
@@ -38,9 +45,11 @@ Upgrade fork of [MSGweb](https://github.com/jtbaccus/MSGweb) for developing long
 
 ## Merge-Back Strategy
 
-When the longitudinal features are stable and tested:
-- Open a PR from `jtbaccus/MSGweb-longitudinal` to `jtbaccus/MSGweb`, or
-- Cherry-pick / manual merge of completed phases
+**Status: WAITING ON JON'S APPROVAL.** Do not merge.
+
+When Jon explicitly approves:
+- PR #7 on `jtbaccus/MSGweb` merges `feature/longitudinal-upgrade` to `main`
+- Production database (Vercel Postgres or Supabase) must be configured before merge
 - The upgrade preserves the existing single-evaluation workflow (mode toggle)
 
 ## Key Decisions
