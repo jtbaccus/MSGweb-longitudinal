@@ -1,6 +1,6 @@
-# codex.md - MSGweb Longitudinal
+# AGENTS.md - MSGweb Longitudinal
 
-Inherit the workspace rules from `/home/jtbaccus/turing/codex.md`.
+Inherit the workspace rules from `/home/jtbaccus/turing/AGENTS.md`.
 
 ## Project Profile
 - Longitudinal branch of the medical student narrative evaluation app.
