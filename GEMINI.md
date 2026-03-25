@@ -31,7 +31,7 @@ This project inherits all global mandates from the root `GEMINI.md`.
 - Jon will explicitly state when he wants it merged. No agent or automated process should perform this merge.
 
 ### Tech Stack
-- **Framework:** Next.js 14 (App Router)
+- **Framework:** Next.js 16 (App Router)
 - **Frontend:** Tailwind CSS, Zustand (state management)
 - **AI:** GPT-5.2 via OpenRouter/OpenAI API
 

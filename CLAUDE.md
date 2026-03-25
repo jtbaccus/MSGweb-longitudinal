@@ -4,11 +4,11 @@
 Next.js web application for generating narrative evaluations for medical students completing clinical clerkship rotations. Uses GPT-5.2 to generate professional narratives based on selected criteria.
 
 ## Tech Stack
-- Next.js 14 (App Router)
+- Next.js 16 (App Router)
 - TypeScript
 - Tailwind CSS
 - Zustand (state management)
-- OpenAI API (GPT-5.2)
+- OpenRouter API (GPT-5.2)
 
 ## Key Files
 - `app/api/generate-narrative/route.ts` - OpenAI API integration (`buildSystemPrompt` with dynamic word count)
@@ -26,7 +26,7 @@ npm run lint   # Run ESLint
 ```
 
 ## Environment Variables
-- `OPENAI_API_KEY` - Required for narrative generation
+- `OPENROUTER_API_KEY` - Required for narrative generation
 
 ## API prompting
 
